@@ -54,6 +54,7 @@ example
 # Keystore files (contains private keys)
 *.keystore
 android/app/*.keystore
+android/keystore.properties
 
 
 .idea/
