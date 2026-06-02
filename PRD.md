@@ -278,7 +278,7 @@ utils/
 assets/
   fonts/
   images/
-    default-artwork.png   ← Fallback — must be local, never remote
+    defaultArtwork.png   ← Fallback — must be local, never remote
 ```
 
 ---
@@ -1004,7 +1004,7 @@ interface ArtworkViewProps {
   borderRadius?: number;
 }
 // Uses expo-image — automatic LRU caching
-// Shows default-artwork.png on undefined or load error
+// Shows defaultArtwork.png on undefined or load error
 // 1px border: COLOR_GREY_2 at 40% opacity
 // NO rotation animation in V1
 ```
@@ -1212,7 +1212,7 @@ Flow:
 
 | Error                    | Detection                                      | Response                                                    |
 | ------------------------ | ---------------------------------------------- | ----------------------------------------------------------- |
-| Missing artwork          | `uri` is null or undefined                     | Show `default-artwork.png` silently                         |
+| Missing artwork          | `uri` is null or undefined                     | Show `defaultArtwork.png` silently                         |
 | Corrupted audio file     | TrackPlayer `PlaybackError` event              | Skip to next, mark song `error: true` in store              |
 | File moved or deleted    | TrackPlayer error on load                      | Remove from library on next scan; skip during queue restore |
 | Unsupported format       | Extension filter in scanner                    | Skip silently                                               |

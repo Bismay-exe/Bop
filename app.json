@@ -21,7 +21,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": ["READ_MEDIA_AUDIO", "POST_NOTIFICATIONS"],
+      "permissions": [
+        "READ_MEDIA_AUDIO",
+        "POST_NOTIFICATIONS"
+      ],
       "package": "bop.music"
     },
     "web": {
@@ -46,6 +49,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0b06f2fb-b1b5-4b26-9a7e-f9873df8349d"
+      }
     }
   }
 }
