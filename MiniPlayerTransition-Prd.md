@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines the architecture and animation system for the Muzik app's premium player transition experience.
+This document defines the architecture and animation system for the bop app's premium player transition experience.
 
 The goal is to achieve a modern, spatially coherent transition system similar to high-end music apps, where the MiniPlayer transforms into the Expanded Player instead of traditional screen navigation.
 
@@ -10,10 +10,10 @@ This is NOT a normal route transition.
 
 The player experience must feel like:
 
-* One continuous surface
-* One persistent player layer
-* Stateful transformation
-* Spatial continuity between collapsed and expanded states
+- One continuous surface
+- One persistent player layer
+- Stateful transformation
+- Spatial continuity between collapsed and expanded states
 
 ---
 
@@ -23,16 +23,16 @@ The player experience must feel like:
 
 When the user taps the MiniPlayer:
 
-* The current screen (Home/Library/Search) must compress upward from the bottom until completely hidden.
-* The screen must NOT slide upward.
-* The screen must NOT remain visible at the top.
-* The compression effect must happen via animated container height reduction.
-* The MiniPlayer itself expands into the full player.
-* Artwork transitions smoothly into its expanded position.
-* Song title and artist text must physically animate to their final positions.
-* Controls fade/slide in AFTER the player expansion begins.
-* No fade-to-black background transitions.
-* No modal-style navigation animations.
+- The current screen (Home/Library/Search) must compress upward from the bottom until completely hidden.
+- The screen must NOT slide upward.
+- The screen must NOT remain visible at the top.
+- The compression effect must happen via animated container height reduction.
+- The MiniPlayer itself expands into the full player.
+- Artwork transitions smoothly into its expanded position.
+- Song title and artist text must physically animate to their final positions.
+- Controls fade/slide in AFTER the player expansion begins.
+- No fade-to-black background transitions.
+- No modal-style navigation animations.
 
 ---
 
@@ -44,11 +44,11 @@ Queue behaves as a secondary surface layered above the player.
 
 When queue opens:
 
-* Queue sheet slides upward from bottom.
-* Artwork shrinks into compact queue header position.
-* Song title and artist animate upward into queue header.
-* Queue list slides independently from bottom.
-* Player remains underneath.
+- Queue sheet slides upward from bottom.
+- Artwork shrinks into compact queue header position.
+- Song title and artist animate upward into queue header.
+- Queue list slides independently from bottom.
+- Player remains underneath.
 
 ---
 
@@ -58,10 +58,10 @@ When queue opens:
 
 DO NOT implement the expanded player using:
 
-* router.push('/player')
-* Stack screen transitions
-* Modal presentation
-* React Navigation shared element packages
+- router.push('/player')
+- Stack screen transitions
+- Modal presentation
+- React Navigation shared element packages
 
 The entire player system must instead exist as a persistent animated layer mounted ABOVE the tab navigator.
 
@@ -86,7 +86,7 @@ The entire player system must instead exist as a persistent animated layer mount
 ## Incorrect Approach
 
 ```tsx
-router.push('/player')
+router.push("/player");
 ```
 
 This creates disconnected navigation transitions.
@@ -100,7 +100,7 @@ The player expands by changing global UI state.
 Example:
 
 ```tsx
-uiStore.setPlayerExpanded(true)
+uiStore.setPlayerExpanded(true);
 ```
 
 The UI transforms itself instead of navigating.
@@ -111,9 +111,9 @@ The UI transforms itself instead of navigating.
 
 ## Core Stack
 
-* react-native-reanimated
-* react-native-gesture-handler
-* Expo Router (navigation only)
+- react-native-reanimated
+- react-native-gesture-handler
+- Expo Router (navigation only)
 
 ---
 
@@ -131,13 +131,13 @@ playerExpandProgress: 0 → 1
 
 This progress value controls:
 
-* Home container compression
-* MiniPlayer expansion
-* Border radius morphing
-* Artwork transition
-* Text transitions
-* Controls reveal
-* Queue transitions
+- Home container compression
+- MiniPlayer expansion
+- Border radius morphing
+- Artwork transition
+- Text transitions
+- Controls reveal
+- Queue transitions
 
 This prevents desynchronized animations.
 
@@ -165,7 +165,7 @@ Example:
 <Animated.View
   style={{
     height: animatedHeight,
-    overflow: 'hidden',
+    overflow: "hidden",
   }}
 >
   <Tabs />
@@ -194,9 +194,9 @@ MiniPlayer must exist ABOVE the tab screens.
 
 It must NOT belong to:
 
-* Home screen
-* Library screen
-* Search screen
+- Home screen
+- Library screen
+- Search screen
 
 MiniPlayer exists globally.
 
@@ -223,20 +223,20 @@ Artwork must use Reanimated shared transitions.
 MiniPlayer artwork:
 
 ```tsx
-sharedTransitionTag="artwork"
+sharedTransitionTag = "artwork";
 ```
 
 Expanded player artwork:
 
 ```tsx
-sharedTransitionTag="artwork"
+sharedTransitionTag = "artwork";
 ```
 
 This allows:
 
-* Size interpolation
-* Position interpolation
-* Border radius interpolation
+- Size interpolation
+- Position interpolation
+- Border radius interpolation
 
 ---
 
@@ -247,13 +247,13 @@ Song title must independently animate using shared transitions.
 MiniPlayer title:
 
 ```tsx
-sharedTransitionTag="title"
+sharedTransitionTag = "title";
 ```
 
 Expanded player title:
 
 ```tsx
-sharedTransitionTag="title"
+sharedTransitionTag = "title";
 ```
 
 The title must physically move to its new position.
@@ -269,13 +269,13 @@ Artist text must ALSO independently animate.
 MiniPlayer artist:
 
 ```tsx
-sharedTransitionTag="artist"
+sharedTransitionTag = "artist";
 ```
 
 Expanded player artist:
 
 ```tsx
-sharedTransitionTag="artist"
+sharedTransitionTag = "artist";
 ```
 
 ---
@@ -294,9 +294,9 @@ Each text element must animate independently.
 
 Otherwise:
 
-* alignment glitches occur
-* scaling becomes ugly
-* interpolation breaks
+- alignment glitches occur
+- scaling becomes ugly
+- interpolation breaks
 
 ---
 
@@ -306,15 +306,15 @@ Playback controls must NOT participate in shared transitions.
 
 Controls should:
 
-* Fade in
-* Slide upward slightly
-* Appear after expansion begins
+- Fade in
+- Slide upward slightly
+- Appear after expansion begins
 
 Recommended:
 
 ```ts
-opacity
-translateY
+opacity;
+translateY;
 ```
 
 with delayed timing.
@@ -325,8 +325,8 @@ with delayed timing.
 
 Progress bar should:
 
-* Fade/slide in
-* NOT morph from MiniPlayer progress bar
+- Fade/slide in
+- NOT morph from MiniPlayer progress bar
 
 MiniPlayer progress and Player progress are separate visual systems.
 
@@ -353,7 +353,7 @@ Queue must be implemented as a layered sheet.
 NOT:
 
 ```tsx
-router.push('/queue')
+router.push("/queue");
 ```
 
 Queue exists above player layer.
@@ -374,20 +374,20 @@ Queue exists above player layer.
 
 Queue sheet:
 
-* Slides upward from bottom
-* Uses independent animation progress
+- Slides upward from bottom
+- Uses independent animation progress
 
 Artwork:
 
-* Shrinks into compact queue header
+- Shrinks into compact queue header
 
 Text:
 
-* Moves upward into queue header positions
+- Moves upward into queue header positions
 
 Queue list:
 
-* Slides independently from bottom
+- Slides independently from bottom
 
 ---
 
@@ -416,12 +416,12 @@ Artwork must sacrifice size first.
 
 DO NOT implement:
 
-* Default stack transitions
-* Fade-to-black transitions
-* Separate Player route navigation
-* Full-screen modal push animations
-* Shared transitions on every component
-* Simultaneous chaotic animations
+- Default stack transitions
+- Fade-to-black transitions
+- Separate Player route navigation
+- Full-screen modal push animations
+- Shared transitions on every component
+- Simultaneous chaotic animations
 
 ---
 
@@ -429,14 +429,14 @@ DO NOT implement:
 
 The app should feel like:
 
-* One living interface
-* One transforming surface
-* Physically continuous UI
+- One living interface
+- One transforming surface
+- Physically continuous UI
 
 NOT:
 
-* Separate disconnected screens
-* Traditional app navigation
+- Separate disconnected screens
+- Traditional app navigation
 
 ---
 
@@ -446,10 +446,10 @@ NOT:
 
 Implement:
 
-* Persistent player layer
-* Expand/collapse container
-* Home compression
-* Border radius interpolation
+- Persistent player layer
+- Expand/collapse container
+- Home compression
+- Border radius interpolation
 
 NO shared elements yet.
 
@@ -459,7 +459,7 @@ NO shared elements yet.
 
 Add:
 
-* Artwork shared transition
+- Artwork shared transition
 
 ---
 
@@ -467,8 +467,8 @@ Add:
 
 Add:
 
-* Title shared transition
-* Artist shared transition
+- Title shared transition
+- Artist shared transition
 
 ---
 
@@ -476,9 +476,9 @@ Add:
 
 Add:
 
-* Controls reveal animations
-* Progress animations
-* Gradient interpolation
+- Controls reveal animations
+- Progress animations
+- Gradient interpolation
 
 ---
 
@@ -486,8 +486,8 @@ Add:
 
 Add:
 
-* Queue sheet system
-* Queue header transitions
+- Queue sheet system
+- Queue header transitions
 
 ---
 
@@ -495,9 +495,9 @@ Add:
 
 The user should never feel like they are:
 
-* Opening screens
-* Navigating pages
-* Switching contexts
+- Opening screens
+- Navigating pages
+- Switching contexts
 
 Instead, the UI should feel like:
 
@@ -509,11 +509,11 @@ The MiniPlayer must behave similarly to the app's bottom navigation bar.
 
 Meaning:
 
-* It exists globally across all screens.
-* It is mounted once at the root layout level.
-* It persists between Home, Library, Search, and future screens.
-* It does NOT remount during navigation.
-* It must remain visually continuous across the entire app.
+- It exists globally across all screens.
+- It is mounted once at the root layout level.
+- It persists between Home, Library, Search, and future screens.
+- It does NOT remount during navigation.
+- It must remain visually continuous across the entire app.
 
 The Player system should therefore be structured like:
 
@@ -535,17 +535,17 @@ The Expanded Player is NOT a separate navigation destination.
 
 Instead:
 
-* The MiniPlayer transforms into the Expanded Player.
-* The Expanded Player transforms back into the MiniPlayer.
-* Both are different visual states of the SAME persistent player layer.
+- The MiniPlayer transforms into the Expanded Player.
+- The Expanded Player transforms back into the MiniPlayer.
+- Both are different visual states of the SAME persistent player layer.
 
 This architecture is mandatory for achieving:
 
-* True shared element transitions
-* Spatial continuity
-* Persistent playback UI
-* Premium expansion animations
-* Smooth queue transitions
-* Non-disconnected player interactions
+- True shared element transitions
+- Spatial continuity
+- Persistent playback UI
+- Premium expansion animations
+- Smooth queue transitions
+- Non-disconnected player interactions
 
 DO NOT implement the player as a traditional routed screen.

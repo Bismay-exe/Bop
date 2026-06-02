@@ -30,8 +30,8 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="muzik"/>
-        <data android:scheme="exp+muzik"/>
+        <data android:scheme="bop"/>
+        <data android:scheme="exp+bop"/>
       </intent-filter>
     </activity>
   </application>
