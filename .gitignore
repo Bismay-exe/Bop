@@ -9,6 +9,18 @@ dist/
 web-build/
 expo-env.d.ts
 
+
+android/.gradle/
+android/build/
+build/
+dist/
+
+*.apk
+*.aab
+*.jks
+
+android/app/build/
+
 # Native
 .kotlin/
 *.orig.*
@@ -41,3 +53,11 @@ example
 # generated native folders
 /ios
 /android
+
+# Keystore files (contains private keys)
+*.keystore
+android/app/*.keystore
+
+
+.idea/
+*.iml
