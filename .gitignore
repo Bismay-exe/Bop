@@ -50,9 +50,6 @@ yarn-error.*
 
 example
 
-# generated native folders
-/ios
-/android
 
 # Keystore files (contains private keys)
 *.keystore
