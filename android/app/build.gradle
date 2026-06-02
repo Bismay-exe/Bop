@@ -3,11 +3,23 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
+
+/**
+ * Signing config resolution order:
+ * 1. Environment variables (CI / GitHub Actions)
+ * 2. android/keystore.properties file (local dev)
+ * 3. gradle.properties values (fallback)
+ */
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+// Helper: resolve a signing value from env → keystore.properties → gradle.properties
+def resolveSigningValue = { String envKey, String propKey ->
+    return System.getenv(envKey) ?: keystoreProperties[propKey] ?: findProperty(propKey)
 }
 
 /**
@@ -120,11 +132,16 @@ android {
         }
 
         release {
-            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
-                storeFile file(MYAPP_UPLOAD_STORE_FILE)
-                storePassword keystoreProperties['MYAPP_UPLOAD_STORE_PASSWORD']
-                keyAlias keystoreProperties['MYAPP_UPLOAD_KEY_ALIAS']
-                keyPassword keystoreProperties['MYAPP_UPLOAD_KEY_PASSWORD']
+            def storeFilePath = resolveSigningValue('ANDROID_KEYSTORE_FILE', 'MYAPP_UPLOAD_STORE_FILE')
+            def sPwd = resolveSigningValue('ANDROID_KEYSTORE_PASSWORD', 'MYAPP_UPLOAD_STORE_PASSWORD')
+            def kAlias = resolveSigningValue('ANDROID_KEY_ALIAS', 'MYAPP_UPLOAD_KEY_ALIAS')
+            def kPwd = resolveSigningValue('ANDROID_KEY_PASSWORD', 'MYAPP_UPLOAD_KEY_PASSWORD')
+
+            if (storeFilePath != null && sPwd != null && kAlias != null && kPwd != null) {
+                storeFile file(storeFilePath)
+                storePassword sPwd
+                keyAlias kAlias
+                keyPassword kPwd
             }
         }
     }
@@ -135,7 +152,8 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.release
+            // Fall back to debug signing if release config is not fully configured
+            signingConfig signingConfigs.release.storeFile != null ? signingConfigs.release : signingConfigs.debug
             def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
             shrinkResources enableShrinkResources.toBoolean()
             minifyEnabled enableMinifyInReleaseBuilds
