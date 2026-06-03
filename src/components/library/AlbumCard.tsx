@@ -49,7 +49,9 @@ function AlbumCardComponent({ album, onPress }: AlbumCardProps) {
 }
 
 export const AlbumCard = React.memo(AlbumCardComponent, (prev, next) => {
-  return prev.album.name === next.album.name && prev.album.songs.length === next.album.songs.length;
+  return prev.album.name === next.album.name && 
+         prev.album.songs.length === next.album.songs.length &&
+         prev.album.artwork === next.album.artwork;
 });
 
 const styles = StyleSheet.create({

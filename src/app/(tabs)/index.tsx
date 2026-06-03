@@ -12,6 +12,7 @@ import { EmptyState } from '../../components/shared/EmptyState';
 import { Song } from '../../types';
 import { replaceQueueAndPlay } from '../../services/TrackPlayerService';
 import { scanLocalMusic } from '../../services/MediaScannerService';
+import * as MediaLibrary from 'expo-media-library/legacy';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -40,6 +41,34 @@ export default function HomeScreen() {
     const index = queue.findIndex(s => s.id === song.id);
     await replaceQueueAndPlay(queue, index !== -1 ? index : 0);
   }, []);
+
+  // Automatic background scan on mount if permissions were already granted
+  React.useEffect(() => {
+    let mounted = true;
+    const runBackgroundScan = async () => {
+      try {
+        const { status } = await MediaLibrary.getPermissionsAsync();
+        if (status === 'granted' && mounted) {
+          useLibraryStore.getState().setScanning(true);
+          const scannedSongs = await scanLocalMusic(() => {});
+          if (mounted) {
+            setSongs(scannedSongs);
+            finalizeScan();
+          }
+        }
+      } catch (err) {
+        console.error('Background scan failed:', err);
+        if (mounted) {
+          useLibraryStore.getState().setScanning(false);
+        }
+      }
+    };
+    
+    // Only run if we actually have some hydrated songs, or if we want to silently refresh
+    runBackgroundScan();
+    
+    return () => { mounted = false; };
+  }, [setSongs, finalizeScan]);
 
   const renderSectionHeader = (title: string) => (
     <Text style={styles.sectionTitle}>{title}</Text>

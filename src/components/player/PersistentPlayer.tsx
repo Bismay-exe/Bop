@@ -41,6 +41,7 @@ export default function PersistentPlayer() {
   const startProgress = useSharedValue(0);
   const startQueueProgress = useSharedValue(0);
   const isDraggingQueue = useSharedValue(false);
+  const touchStartY = useSharedValue(0);
 
   const togglePlayer = () => {
     if (transitionState === 'expanded' || transitionState === 'expanding') {
@@ -61,12 +62,23 @@ export default function PersistentPlayer() {
   };
 
   const panGesture = Gesture.Pan()
+    .onTouchesDown((e) => {
+      'worklet';
+      touchStartY.value = e.changedTouches[0].y;
+    })
     .onTouchesMove((e, manager) => {
       'worklet';
-      // If the queue sheet is visible and the user's list is scrolled down,
-      // fail the pan gesture so the FlashList can handle the scroll events.
-      if (queueProgress.value > 0.5 && queueScrollY.value > 5) {
-        manager.fail();
+      // If the queue sheet is visible...
+      if (queueProgress.value > 0.5) {
+        const currentY = e.changedTouches[0].y;
+        const isDraggingUp = currentY < touchStartY.value;
+        
+        // Fail the pan gesture if the user's list is already scrolled down,
+        // OR if they are at the top but dragging UP (scrolling list down).
+        // This allows the FlashList to handle the scroll event.
+        if (queueScrollY.value > 5 || isDraggingUp) {
+          manager.fail();
+        }
       }
     })
     .activeOffsetY([-10, 10])

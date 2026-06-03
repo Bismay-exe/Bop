@@ -94,7 +94,10 @@ function SongCardComponent({ song, onPress, onLongPress, isActive }: SongCardPro
 }
 
 export const SongCard = React.memo(SongCardComponent, (prev, next) => {
-  return prev.song.id === next.song.id && prev.isActive === next.isActive;
+  return prev.song.id === next.song.id && 
+         prev.isActive === next.isActive &&
+         prev.song.artwork === next.song.artwork &&
+         prev.song.title === next.song.title;
 });
 
 const styles = StyleSheet.create({

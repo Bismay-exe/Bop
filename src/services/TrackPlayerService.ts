@@ -7,6 +7,7 @@ import TrackPlayer, {
 } from 'react-native-track-player';
 import { Song, PlaybackState as CustomPlaybackState } from '../types';
 import { usePlayerStore } from '../store/playerStore';
+import { useLibraryStore } from '../store/libraryStore';
 
 let isSetup = false;
 
@@ -59,15 +60,19 @@ export function startEventSync(): () => void {
       // We stored the full `Song` attributes when we added it via mapSongToTrack,
       // but to be safe we can extract what RNTP gives us.
       const track = event.track;
-      const song: Song = {
+      const librarySong = useLibraryStore.getState().songs.find(s => s.id === track.id);
+      
+      const song: Song = librarySong ? librarySong : {
         id: track.id,
         uri: track.url || '',
+        filename: 'unknown',
+        modificationTime: 0,
         title: track.title || 'Unknown',
         artist: track.artist || 'Unknown',
         album: track.album || 'Unknown',
         artwork: track.artwork || undefined,
         duration: track.duration || 0,
-        dateAdded: Date.now(), // dummy for active track sync
+        dateAdded: Date.now(),
       };
       usePlayerStore.getState().setCurrentTrack(song);
     } else {

@@ -1,4 +1,4 @@
-import React from 'react';
+  import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import Animated, { useAnimatedStyle, interpolate, Extrapolation } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import { FlashList } from '@shopify/flash-list';
 import { Colors, Spacing, Typography, Radius } from '../../constants';
 import { usePlayerAnimation } from '../../contexts/PlayerAnimationContext';
 import { usePlayer } from '../../hooks/usePlayer';
+import { useLibraryStore } from '../../store/libraryStore';
 import { Song } from '../../types';
 
 // We'll bring back a copy of PillsBar for the Queue Sheet top section
@@ -18,6 +19,7 @@ export default function QueueSheet() {
   const { height: currentHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { queue, currentTrack, skip } = usePlayer();
+  const librarySongs = useLibraryStore((s) => s.songs);
 
   // The Top Header takes up roughly: insets.top + 24 (margin) + 56 (artwork) + 24 (bottom padding) = 104 + insets.top
   const topHeaderHeight = Math.max(insets.top, 24) + 56 + 32;
@@ -43,15 +45,16 @@ export default function QueueSheet() {
 
   const renderItem = ({ item, index }: { item: Song & { queueId: string }, index: number }) => {
     const isPlaying = currentTrack?.id === item.id;
+    const upToDateSong = librarySongs.find(s => s.id === item.id) || item;
     
     return (
       <TouchableOpacity 
         style={[styles.itemContainer, isPlaying && styles.itemPlaying]}
         onPress={() => skip(index)}
       >
-        {item.artwork ? (
+        {upToDateSong.artwork ? (
           <ExpoImage
-            source={{ uri: item.artwork }}
+            source={{ uri: upToDateSong.artwork }}
             style={styles.itemArtwork}
             contentFit="cover"
             transition={200}
@@ -64,10 +67,10 @@ export default function QueueSheet() {
         )}
         <View style={styles.itemInfo}>
           <Text style={[styles.title, isPlaying && styles.textPlaying]} numberOfLines={1}>
-            {item.title}
+            {upToDateSong.title || item.title}
           </Text>
           <Text style={[styles.artist, isPlaying && styles.textPlaying]} numberOfLines={1}>
-            {item.artist}
+            {upToDateSong.artist || item.artist}
           </Text>
         </View>
         {isPlaying ? (

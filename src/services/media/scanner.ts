@@ -5,6 +5,7 @@ import { evictStaleArtwork } from './artwork';
 
 const SUPPORTED_EXTENSIONS = ['mp3', 'wav', 'flac', 'm4a', 'aac', 'ogg'];
 const PAGE_SIZE = 100;
+import { Directory, Paths } from 'expo-file-system';
 
 export async function requestMediaPermissions(): Promise<'granted' | 'denied' | 'blocked'> {
   const { status, canAskAgain } = await MediaLibrary.getPermissionsAsync();
@@ -32,6 +33,12 @@ export async function syncMediaLibrary(
   const cachedSongs = MediaCache.getAllSongs();
   const cachedMap = new Map<string, CachedSong>();
   cachedSongs.forEach(s => cachedMap.set(s.id, s));
+
+  const artworkDir = new Directory(Paths.cache, 'artworks');
+  let existingArtworks = new Set<string>();
+  if (artworkDir.exists) {
+    existingArtworks = new Set(artworkDir.list().map(f => f.uri.split('/').pop() || ''));
+  }
 
   // 2. Fetch raw assets via pagination
   let hasNextPage = true;
@@ -117,7 +124,20 @@ export async function syncMediaLibrary(
       });
     } else {
       // UNCHANGED FILE
-      finalSongs.push(cached);
+      const expectedArtworkFile = `${cached.id}_${cached.modificationTime}.jpg`;
+      if (cached.title !== undefined && cached.artwork !== undefined && !existingArtworks.has(expectedArtworkFile)) {
+        // Missing artwork file despite being cached! Reset it to force re-extraction.
+        hasChanges = true;
+        finalSongs.push({
+          ...cached,
+          title: undefined,
+          artist: undefined,
+          album: undefined,
+          artwork: undefined,
+        });
+      } else {
+        finalSongs.push(cached);
+      }
     }
   }
 
