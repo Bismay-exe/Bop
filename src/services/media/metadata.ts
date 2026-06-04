@@ -4,7 +4,7 @@ import { RawAsset, ParsedMetadata, QueueTask } from '../../types/media';
 import { normalizeAudioUri } from './uri';
 import { cacheArtworkToDisk } from './artwork';
 import { MediaConcurrency } from './concurrency';
-import { parseLyrics } from './lyricsParser';
+import { parseEmbeddedLyrics } from '../lyrics/lyricsParser';
 
 /**
  * Encapsulated parsing layer.
@@ -59,7 +59,7 @@ export function queueMetadataExtraction(
       const title = rawMeta.common.title || asset.filename.replace(/\.[^/.]+$/, '');
       const artist = rawMeta.common.artist || 'Unknown Artist';
       const album = rawMeta.common.album || (asset.albumId ? `Album ${asset.albumId}` : 'Unknown Album');
-      const lyrics = parseLyrics(rawMeta.common.lyrics as any);
+      const lyrics = parseEmbeddedLyrics(rawMeta.common.lyrics);
       
       let hasArtwork = false;
       let artworkHash = undefined;

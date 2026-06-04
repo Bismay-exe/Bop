@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Song, QueueItem, PlaybackState, RepeatMode } from '../types';
+import { LyricsPayload } from '../services/lyrics/lyricsCache';
 
 interface PlayerStore {
   currentTrack: Song | null;
@@ -8,8 +9,12 @@ interface PlayerStore {
   queueIndex: number;
   repeatMode: RepeatMode;
   shuffleEnabled: boolean;
+  onlineLyrics: LyricsPayload | null;
+  isFetchingLyrics: boolean;
 
   setCurrentTrack: (song: Song | null) => void;
+  setOnlineLyrics: (payload: LyricsPayload | null) => void;
+  setIsFetchingLyrics: (isFetching: boolean) => void;
   setPlaybackState: (state: PlaybackState) => void;
   setQueue: (songs: Song[]) => void;
   clearQueue: () => void;
@@ -25,8 +30,12 @@ export const usePlayerStore = create<PlayerStore>((set) => ({
   queueIndex: 0,
   repeatMode: 'off',
   shuffleEnabled: false,
+  onlineLyrics: null,
+  isFetchingLyrics: false,
 
-  setCurrentTrack: (song) => set({ currentTrack: song }),
+  setCurrentTrack: (song) => set({ currentTrack: song, onlineLyrics: null, isFetchingLyrics: false }), // Clear lyrics when track changes
+  setOnlineLyrics: (payload) => set({ onlineLyrics: payload, isFetchingLyrics: false }),
+  setIsFetchingLyrics: (isFetching) => set({ isFetchingLyrics: isFetching }),
   setPlaybackState: (state) => set({ playbackState: state }),
   
   // These setters just MIRROR the RNTP state. 

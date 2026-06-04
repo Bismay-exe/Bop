@@ -7,6 +7,7 @@ import TrackPlayer, {
 } from 'react-native-track-player';
 import { Song, PlaybackState as CustomPlaybackState } from '../types';
 import { usePlayerStore } from '../store/playerStore';
+import { prefetchLyricsForTrack } from './lyrics/lyricsPrefetch';
 import { useLibraryStore } from '../store/libraryStore';
 
 let isSetup = false;
@@ -75,6 +76,8 @@ export function startEventSync(): () => void {
         dateAdded: Date.now(),
       };
       usePlayerStore.getState().setCurrentTrack(song);
+      // Aggressively prefetch lyrics in the background
+      prefetchLyricsForTrack(song.artist, song.title, song.id);
     } else {
       usePlayerStore.getState().setCurrentTrack(null);
     }

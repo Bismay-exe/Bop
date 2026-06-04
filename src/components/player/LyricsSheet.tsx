@@ -38,7 +38,12 @@ export default function LyricsSheet() {
   const { height: currentHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const currentTrack = usePlayerStore(state => state.currentTrack);
-  const lyrics = currentTrack?.lyrics || [];
+  const onlineLyrics = usePlayerStore(state => state.onlineLyrics);
+  const isFetchingLyrics = usePlayerStore(state => state.isFetchingLyrics);
+  
+  // Prioritize embedded lyrics, then synced online, then plain online
+  const lyrics = currentTrack?.lyrics || onlineLyrics?.syncedLyrics || onlineLyrics?.plainLyrics || [];
+  
   const { position } = useProgress(250); // update every 250ms
   const listRef = React.useRef<any>(null);
   const userIsScrolling = React.useRef(false);
@@ -113,6 +118,10 @@ export default function LyricsSheet() {
               paddingHorizontal: Spacing.xl,
             }}
           />
+        ) : isFetchingLyrics ? (
+          <View style={styles.emptyContainer}>
+            <Animated.Text style={[styles.emptyText, { opacity: 0.5 }]}>Fetching Lyrics...</Animated.Text>
+          </View>
         ) : (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No Lyrics Found</Text>
