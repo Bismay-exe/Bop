@@ -10,7 +10,7 @@ import QueueIcon from '../../assets/icons/queue.svg';
 import TimerIcon from '../../assets/icons/timer-outline.svg';
 
 export default function PlayerPillsBar() {
-  const { toggleQueue } = usePlayerAnimation();
+  const { toggleOverlay } = usePlayerAnimation();
 
   return (
     <View style={styles.pillsWrapper}>
@@ -22,11 +22,12 @@ export default function PlayerPillsBar() {
         <Pill 
           icon={<LyricsIcon width={20} height={20} color={Colors.background} />} 
           label="Lyrics" 
+          onPress={() => toggleOverlay('lyrics')}
         />
         <Pill 
           icon={<QueueIcon width={20} height={20} color={Colors.background} />} 
           label="Queue" 
-          onPress={toggleQueue}
+          onPress={() => toggleOverlay('queue')}
         />
         <Pill 
           icon={<TimerIcon width={20} height={20} color={Colors.background} />} 

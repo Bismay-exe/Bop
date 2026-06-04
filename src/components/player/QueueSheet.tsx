@@ -15,7 +15,7 @@ import { Song } from '../../types';
 import PlayerPillsBar from './PlayerPillsBar';
 
 export default function QueueSheet() {
-  const { queueProgress, queueScrollY } = usePlayerAnimation();
+  const { overlayProgress, overlayScrollY, overlayMode } = usePlayerAnimation();
   const { height: currentHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { queue, currentTrack, skip } = usePlayer();
@@ -26,21 +26,22 @@ export default function QueueSheet() {
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
+      opacity: overlayMode === 'queue' ? interpolate(overlayProgress.value, [0, 0.5, 1], [0, 0, 1], Extrapolation.CLAMP) : 0,
       transform: [
         {
-          translateY: interpolate(
-            queueProgress.value,
+          translateY: overlayMode === 'queue' ? interpolate(
+            overlayProgress.value,
             [0, 1],
             [currentHeight, topHeaderHeight],
             Extrapolation.CLAMP
-          ),
+          ) : currentHeight,
         },
       ],
     };
   });
   
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    queueScrollY.value = event.nativeEvent.contentOffset.y;
+    overlayScrollY.value = event.nativeEvent.contentOffset.y;
   };
 
   const renderItem = ({ item, index }: { item: Song & { queueId: string }, index: number }) => {
@@ -83,7 +84,7 @@ export default function QueueSheet() {
   };
 
   return (
-    <Animated.View style={[styles.container, animatedStyle]}>
+    <Animated.View style={[styles.container, animatedStyle]} pointerEvents={overlayMode === 'queue' ? 'auto' : 'none'}>
       {/* Small drag handle indicator */}
       <View style={styles.handleContainer}>
         <View style={styles.handle} />

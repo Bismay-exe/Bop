@@ -1,3 +1,9 @@
+export type LyricsLine = {
+  text: string;
+  timestamp?: number;
+  isSectionHeader?: boolean;
+};
+
 export interface RawAsset {
   id: string;
   uri: string;
@@ -13,6 +19,7 @@ export interface ParsedMetadata {
   album: string;
   hasArtwork: boolean;
   artworkHash?: string; // Hash used for cache invalidation
+  lyrics?: LyricsLine[];
 }
 
 export interface ArtworkCacheEntry {
@@ -31,6 +38,7 @@ export interface CachedSong {
   artist?: string;
   album?: string;
   artwork?: string; // URL to the cached artwork file
+  lyrics?: LyricsLine[];
   dateAdded: number;
 }
 

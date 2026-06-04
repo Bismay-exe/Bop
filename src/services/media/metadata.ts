@@ -4,6 +4,7 @@ import { RawAsset, ParsedMetadata, QueueTask } from '../../types/media';
 import { normalizeAudioUri } from './uri';
 import { cacheArtworkToDisk } from './artwork';
 import { MediaConcurrency } from './concurrency';
+import { parseLyrics } from './lyricsParser';
 
 /**
  * Encapsulated parsing layer.
@@ -58,6 +59,7 @@ export function queueMetadataExtraction(
       const title = rawMeta.common.title || asset.filename.replace(/\.[^/.]+$/, '');
       const artist = rawMeta.common.artist || 'Unknown Artist';
       const album = rawMeta.common.album || (asset.albumId ? `Album ${asset.albumId}` : 'Unknown Album');
+      const lyrics = parseLyrics(rawMeta.common.lyrics as any);
       
       let hasArtwork = false;
       let artworkHash = undefined;
@@ -76,7 +78,7 @@ export function queueMetadataExtraction(
           priority: priority, 
           cancel: () => {}, // We don't typically cancel disk writes once triggered, to ensure consistency
           execute: async () => {
-             await cacheArtworkToDisk(asset.id, asset.modificationTime, rawMeta.common.picture![0].data);
+            await cacheArtworkToDisk(asset.id, asset.modificationTime, rawMeta.common.picture![0].data);
           }
         });
       }
@@ -87,7 +89,8 @@ export function queueMetadataExtraction(
         artist,
         album,
         hasArtwork,
-        artworkHash
+        artworkHash,
+        lyrics
       });
     }
   };

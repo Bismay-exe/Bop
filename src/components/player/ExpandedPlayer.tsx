@@ -14,7 +14,6 @@ import PlayerPillsBar from './PlayerPillsBar';
 // Custom SVGs
 import DownIcon from '../../assets/icons/down.svg';
 import DetailsIcon from '../../assets/icons/details.svg';
-import HeartIcon from '../../assets/icons/heart.svg';
 
 const { width, height } = Dimensions.get('window');
 const isVeryCompact = height < 700;
@@ -32,7 +31,7 @@ interface Props {
 
 export default function ExpandedPlayer({ onCollapse }: Props) {
   const currentTrack = usePlayerStore(state => state.currentTrack);
-  const { expandProgress } = usePlayerAnimation();
+  const { expandProgress, overlayMode } = usePlayerAnimation();
   const insets = useSafeAreaInsets();
   const setMetrics = usePlayerLayoutStore((s) => s.setMetrics);
 
@@ -45,10 +44,21 @@ export default function ExpandedPlayer({ onCollapse }: Props) {
     };
   });
 
+  const { overlayProgress } = usePlayerAnimation();
+  const pillsStyle = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(overlayProgress.value, [0, 0.5], [1, 0], Extrapolation.CLAMP),
+      transform: [
+        { scale: interpolate(overlayProgress.value, [0, 1], [1, 0.8], Extrapolation.CLAMP) },
+        { translateY: interpolate(overlayProgress.value, [0, 1], [0, 20], Extrapolation.CLAMP) }
+      ]
+    };
+  });
+
   return (
-    <View style={[styles.container, { paddingTop: Math.max(insets.top, 24), paddingBottom: Math.max(insets.bottom, 24) }]}>
+    <View style={[styles.container, { paddingTop: Math.max(insets.top, 24), paddingBottom: Math.max(insets.bottom, 24) }]} pointerEvents="box-none">
       {/* Top Bar */}
-      <View style={styles.header}>
+      <View style={[styles.header, { opacity: overlayMode !== 'none' ? 0 : 1 }]} pointerEvents={overlayMode !== 'none' ? 'none' : 'box-none'}>
         <TouchableOpacity onPress={onCollapse} style={styles.iconButton}>
           <DownIcon width={28} height={28} color={Colors.textPrimary} />
         </TouchableOpacity>
@@ -59,9 +69,10 @@ export default function ExpandedPlayer({ onCollapse }: Props) {
       </View>
 
       {/* Main Content */}
-      <View style={styles.centerSection}>
+      <View style={styles.centerSection} pointerEvents="box-none">
         <View
           style={{ opacity: 0 }}
+          pointerEvents="none"
           onLayout={(e) => {
             e.target.measureInWindow((x, y, width, height) => {
               if (width > 0 && height > 0) {
@@ -79,14 +90,15 @@ export default function ExpandedPlayer({ onCollapse }: Props) {
       </View>
 
       {/* Bottom Section */}
-      <View style={[styles.bottomSection, { bottom: Math.max(insets.bottom, 58) }]}>
+      <View style={[styles.bottomSection, { bottom: Math.max(insets.bottom, 58) }]} pointerEvents="box-none">
 
 
         {/* Title, Artist, and Like Button */}
-        <View style={styles.metadataContainer}>
-          <View style={styles.textContainer}>
+        <View style={styles.metadataContainer} pointerEvents="box-none">
+          <View style={styles.textContainer} pointerEvents="box-none">
             <View
               style={{ opacity: 0 }}
+              pointerEvents="none"
               onLayout={(e) => {
                 e.target.measureInWindow((x, y, width, height) => {
                   if (width > 0 && height > 0) {
@@ -101,6 +113,7 @@ export default function ExpandedPlayer({ onCollapse }: Props) {
             </View>
             <View
               style={{ opacity: 0 }}
+              pointerEvents="none"
               onLayout={(e) => {
                 e.target.measureInWindow((x, y, width, height) => {
                   if (width > 0 && height > 0) {
@@ -114,13 +127,14 @@ export default function ExpandedPlayer({ onCollapse }: Props) {
               </Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.heartButton}>
-            <HeartIcon width={24} height={24} color={Colors.background} />
-          </TouchableOpacity>
+          {/* Heart button is now a ghost element in PersistentPlayer */}
+          <View style={styles.heartPlaceholder} />
         </View>
         {/* Controls that reveal after expansion */}
         <Animated.View style={[styles.controlsContainer, controlsStyle]}>
-          <PlayerPillsBar />
+          <Animated.View style={pillsStyle}>
+            <PlayerPillsBar />
+          </Animated.View>
           <ProgressBar />
           <PlaybackControls />
         </Animated.View>
@@ -182,8 +196,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Regular',
     color: Colors.textSecondary,
   },
-  heartButton: {
-    padding: Spacing.xs,
+  heartPlaceholder: {
+    width: 48,
+    height: 48, // Matches the heart button padding/size so layout remains stable
   },
   bottomSection: {
     position: 'absolute',

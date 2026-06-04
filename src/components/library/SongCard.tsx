@@ -41,6 +41,7 @@ function SongCardComponent({ song, onPress, onLongPress, isActive }: SongCardPro
           artist: metadata.artist,
           album: metadata.album,
           artwork: metadata.hasArtwork ? getArtworkFilePath(localSong.id, localSong.modificationTime || 0) : undefined,
+          lyrics: metadata.lyrics,
         };
         setLocalSong(updated);
         // Persist so we don't extract again next time

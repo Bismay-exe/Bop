@@ -8,11 +8,12 @@ interface Props {
   size: number;
   style?: ViewStyle;
   sharedTransitionTag?: string;
+  disableTransition?: boolean;
 }
 
 import { useState, useEffect } from 'react';
 
-export default function ArtworkView({ uri, size, style, sharedTransitionTag }: Props) {
+export default function ArtworkView({ uri, size, style, sharedTransitionTag, disableTransition }: Props) {
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export default function ArtworkView({ uri, size, style, sharedTransitionTag }: P
         source={source} 
         style={styles.image} 
         contentFit="cover" 
-        transition={200}
+        transition={disableTransition ? 0 : 200}
         onError={() => setHasError(true)}
       />
     </Animated.View>
