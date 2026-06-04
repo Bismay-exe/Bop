@@ -12,7 +12,9 @@ import { usePlayerAnimation } from '../../contexts/PlayerAnimationContext';
 import { usePlayerStore } from '../../store/playerStore';
 import { LyricsLine } from '../../types';
 
-const LyricsRow = React.memo(({ item, isActive }: { item: LyricsLine; isActive: boolean }) => {
+import { SharedValue } from 'react-native-reanimated';
+
+const LyricsRow = React.memo(({ item, index, activeLineIndex }: { item: LyricsLine; index: number; activeLineIndex: SharedValue<number> }) => {
   if (item.isSectionHeader) {
     return (
       <View style={styles.sectionHeaderContainer}>
@@ -21,17 +23,31 @@ const LyricsRow = React.memo(({ item, isActive }: { item: LyricsLine; isActive: 
     );
   }
 
+  const animatedStyle = useAnimatedStyle(() => {
+    const distance = Math.abs(activeLineIndex.value - index);
+    
+    let opacity = 0.2; // Distant
+    if (activeLineIndex.value === -1) {
+      opacity = 0.6; // Fallback if no active line
+    } else if (distance === 0) {
+      opacity = 1.0; // Active
+    } else if (distance === 1) {
+      opacity = 0.6; // Adjacent
+    }
+
+    return {
+      opacity: withTiming(opacity, { duration: 250 }),
+    };
+  });
+
   return (
     <View style={styles.rowContainer}>
-      <Text style={[
-        styles.lineText,
-        isActive ? styles.activeLine : styles.inactiveLine
-      ]}>
+      <Animated.Text style={[styles.lineText, animatedStyle, { color: '#FFFFFF' }]}>
         {item.text}
-      </Text>
+      </Animated.Text>
     </View>
   );
-}, (prev, next) => prev.item.text === next.item.text && prev.isActive === next.isActive);
+}, (prev, next) => prev.item.text === next.item.text && prev.index === next.index);
 
 export default function LyricsSheet() {
   const { overlayProgress, overlayScrollY, overlayMode, setOverlayState, setOverlayMode } = usePlayerAnimation();
@@ -48,30 +64,65 @@ export default function LyricsSheet() {
   const listRef = React.useRef<any>(null);
   const userIsScrolling = React.useRef(false);
 
-  // Find the active line based on timestamps
-  const activeLineIndex = React.useMemo(() => {
-    if (!lyrics.length || lyrics[0].timestamp === undefined) return 0;
+  const sharedActiveLineIndex = useSharedValue(-1);
+  const scrollTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Find the active line based on timestamps and manage scroll trigger
+  React.useEffect(() => {
+    if (!lyrics.length || lyrics[0].timestamp === undefined) {
+      sharedActiveLineIndex.value = -1;
+      return;
+    }
     
-    // Find the last lyric line that has a timestamp less than or equal to current position
-    // Since lyrics are usually ordered, we can search backwards for efficiency or use simple findLastIndex.
+    const positionMs = position * 1000;
+    let newIndex = 0;
     for (let i = lyrics.length - 1; i >= 0; i--) {
-      if (lyrics[i].timestamp !== undefined && (lyrics[i].timestamp as number) <= position) {
-        return i;
+      if (lyrics[i].timestamp !== undefined && (lyrics[i].timestamp as number) <= positionMs) {
+        newIndex = i;
+        break;
       }
     }
-    return 0;
+    
+    if (sharedActiveLineIndex.value !== newIndex) {
+      sharedActiveLineIndex.value = newIndex;
+      
+      // Stabilization micro-delay before scroll (50-120ms)
+      if (!userIsScrolling.current && listRef.current) {
+        setTimeout(() => {
+          if (!userIsScrolling.current && listRef.current) {
+            listRef.current.scrollToIndex({
+              index: newIndex,
+              animated: true,
+              viewPosition: 0.4, // Cinematic center (40%)
+            });
+          }
+        }, 100);
+      }
+    }
   }, [lyrics, position]);
 
-  // Auto-scroll when active line changes
-  React.useEffect(() => {
-    if (listRef.current && lyrics.length > 0 && !userIsScrolling.current) {
-      listRef.current.scrollToIndex({
-        index: activeLineIndex,
-        animated: true,
-        viewPosition: 0.5, // Center the active item in the view
-      });
+  const handleScrollBeginDrag = useCallback(() => {
+    userIsScrolling.current = true;
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = null;
     }
-  }, [activeLineIndex, lyrics.length]);
+  }, []);
+
+  const handleMomentumScrollEnd = useCallback(() => {
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      userIsScrolling.current = false;
+      // Optionally snap back immediately if we have an active line
+      if (listRef.current && sharedActiveLineIndex.value !== -1) {
+         listRef.current.scrollToIndex({
+            index: sharedActiveLineIndex.value,
+            animated: true,
+            viewPosition: 0.4,
+         });
+      }
+    }, 3000);
+  }, [sharedActiveLineIndex]);
 
   const topHeaderHeight = Math.max(insets.top, 24) + 56 + 32;
   const bottomControlsHeight = Math.max(insets.bottom, 58) + 120; // Approx height for PlaybackControls + progress bar
@@ -97,8 +148,8 @@ export default function LyricsSheet() {
   };
 
   const renderItem = useCallback(({ item, index }: { item: LyricsLine, index: number }) => {
-    return <LyricsRow item={item} isActive={index === activeLineIndex} />;
-  }, [activeLineIndex]);
+    return <LyricsRow item={item} index={index} activeLineIndex={sharedActiveLineIndex} />;
+  }, [sharedActiveLineIndex]);
 
   return (
     <Animated.View style={[styles.container, animatedStyle]} pointerEvents={overlayMode === 'lyrics' ? 'auto' : 'none'}>
@@ -108,8 +159,8 @@ export default function LyricsSheet() {
             data={lyrics}
             renderItem={renderItem}
             onScroll={handleScroll}
-            onScrollBeginDrag={() => { userIsScrolling.current = true; }}
-            onMomentumScrollEnd={() => { userIsScrolling.current = false; }}
+            onScrollBeginDrag={handleScrollBeginDrag}
+            onMomentumScrollEnd={handleMomentumScrollEnd}
             scrollEventThrottle={16}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
