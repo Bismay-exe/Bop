@@ -19,6 +19,7 @@ interface PlayerAnimationContextType {
   toggleOverlay: (mode: PlayerOverlayMode) => void;
   
   overlayScrollY: SharedValue<number>; // shared for both queue and lyrics scroll offset
+  collapseCurrentLayer: () => boolean;
 }
 
 const PlayerAnimationContext = createContext<PlayerAnimationContextType | null>(null);
@@ -62,12 +63,43 @@ export function PlayerAnimationProvider({ children }: { children: React.ReactNod
     }
   }, [overlayState, overlayMode, overlayProgress]);
 
+  const transitionStateRef = React.useRef(transitionState);
+  transitionStateRef.current = transitionState;
+  
+  const overlayStateRef = React.useRef(overlayState);
+  overlayStateRef.current = overlayState;
+
+  const collapseCurrentLayer = React.useCallback(() => {
+    if (overlayStateRef.current !== 'closed' && overlayStateRef.current !== 'closing') {
+      setOverlayState('closing');
+      overlayProgress.value = withTiming(0, {
+        duration: 300,
+        easing: Easing.bezier(0.32, 0.72, 0, 1)
+      });
+      setTimeout(() => {
+        setOverlayState('closed');
+        setOverlayMode('none');
+      }, 300);
+      return true;
+    }
+    if (transitionStateRef.current !== 'collapsed' && transitionStateRef.current !== 'collapsing') {
+      setTransitionState('collapsing');
+      expandProgress.value = withTiming(0, {
+        duration: 300,
+        easing: Easing.bezier(0.32, 0.72, 0, 1)
+      });
+      setTimeout(() => setTransitionState('collapsed'), 300);
+      return true;
+    }
+    return false;
+  }, []);
+
   return (
     <PlayerAnimationContext.Provider 
       value={{ 
         expandProgress, transitionState, setTransitionState,
         overlayMode, setOverlayMode, overlayProgress, overlayState, setOverlayState, toggleOverlay,
-        overlayScrollY
+        overlayScrollY, collapseCurrentLayer
       }}
     >
       {children}

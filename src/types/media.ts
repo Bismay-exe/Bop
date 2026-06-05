@@ -20,6 +20,11 @@ export interface ParsedMetadata {
   hasArtwork: boolean;
   artworkHash?: string; // Hash used for cache invalidation
   lyrics?: LyricsLine[];
+  genre?: string;
+  year?: number;
+  language?: string;
+  mood?: string;
+  folder?: string;
 }
 
 export interface ArtworkCacheEntry {
@@ -39,6 +44,11 @@ export interface CachedSong {
   album?: string;
   artwork?: string; // URL to the cached artwork file
   lyrics?: LyricsLine[];
+  genre?: string;
+  year?: number;
+  language?: string;
+  mood?: string;
+  folder?: string;
   dateAdded: number;
 }
 

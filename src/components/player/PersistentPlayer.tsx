@@ -1,4 +1,5 @@
-import { StyleSheet, useWindowDimensions, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, useWindowDimensions, View, TouchableOpacity, BackHandler } from 'react-native';
+import React, { useEffect } from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { Easing, interpolate, interpolateColor, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,7 +23,7 @@ import HeartIcon from '../../assets/icons/heart.svg';
 const BOTTOM_NAV_HEIGHT = 60; // Approximate tab bar height for Phase 1
 
 export default function PersistentPlayer() {
-  const { expandProgress, transitionState, setTransitionState, overlayProgress, overlayState, setOverlayState, overlayScrollY, overlayMode, toggleOverlay } = usePlayerAnimation();
+  const { expandProgress, transitionState, setTransitionState, overlayProgress, overlayState, setOverlayState, overlayScrollY, overlayMode, toggleOverlay, collapseCurrentLayer } = usePlayerAnimation();
   const { height: currentHeight, width } = useWindowDimensions();
   const isVeryCompact = currentHeight < 700;
   const isCompact = currentHeight < 820;
@@ -63,6 +64,18 @@ export default function PersistentPlayer() {
       setTimeout(() => setTransitionState('expanded'), 400);
     }
   };
+
+  useEffect(() => {
+    const onBackPress = () => {
+      return collapseCurrentLayer();
+    };
+
+    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+    return () => {
+      subscription.remove();
+    };
+  }, [collapseCurrentLayer]);
 
   const panGesture = Gesture.Pan()
     .onTouchesDown((e, manager) => {

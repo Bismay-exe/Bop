@@ -61,6 +61,18 @@ export function queueMetadataExtraction(
       const album = rawMeta.common.album || (asset.albumId ? `Album ${asset.albumId}` : 'Unknown Album');
       const lyrics = parseEmbeddedLyrics(rawMeta.common.lyrics);
       
+      const genre = rawMeta.common.genre && rawMeta.common.genre.length > 0 ? rawMeta.common.genre[0] : undefined;
+      const year = rawMeta.common.year;
+      
+      // Extract language and mood from extended common tags if available (casting to any since they might not be in standard type definitions)
+      const commonExtended = rawMeta.common as any;
+      const language = commonExtended.language;
+      const mood = commonExtended.mood;
+      
+      // Derive folder from URI
+      const folderPathMatch = asset.uri.match(/(.*)[\/\\]/);
+      const folder = folderPathMatch ? folderPathMatch[1] : 'Unknown Folder';
+
       let hasArtwork = false;
       let artworkHash = undefined;
 
@@ -90,7 +102,12 @@ export function queueMetadataExtraction(
         album,
         hasArtwork,
         artworkHash,
-        lyrics
+        lyrics,
+        genre,
+        year,
+        language,
+        mood,
+        folder
       });
     }
   };
