@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { ArtistGroup } from '../../hooks/useLibrary';
-import { Colors, Typography, Spacing, Radius } from '../../constants';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Colors, Radius, Spacing, Typography } from '../../constants';
+import { ArtistGroup } from '../../hooks/useLibrary';
 
 interface ArtistCardProps {
   artist: ArtistGroup;
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     borderBottomWidth: 1,
     borderBottomColor: Colors.divider,
   },
@@ -57,7 +57,6 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.body,
     color: Colors.textPrimary,
-    fontWeight: '600',
     marginBottom: 2,
   },
   subtitle: {

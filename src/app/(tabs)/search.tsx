@@ -1,13 +1,13 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { Colors, Typography, Spacing } from '../../constants';
-import { SearchBar } from '../../components/shared/SearchBar';
-import { useSearch } from '../../hooks/useSearch';
+import { useCallback, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { SongCard } from '../../components/library/SongCard';
 import { EmptyState } from '../../components/shared/EmptyState';
-import { useLibraryStore } from '../../store/libraryStore';
+import { SearchBar } from '../../components/shared/SearchBar';
+import { Colors, Spacing, Typography } from '../../constants';
+import { useSearch } from '../../hooks/useSearch';
 import { replaceQueueAndPlay } from '../../services/TrackPlayerService';
+import { useLibraryStore } from '../../store/libraryStore';
 import { Song } from '../../types';
 
 export default function SearchScreen() {
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...Typography.displayLarge,
     color: Colors.textPrimary,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xxl,
     paddingBottom: Spacing.md,
   },

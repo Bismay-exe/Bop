@@ -99,7 +99,6 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.body,
     color: Colors.textPrimary,
-    fontWeight: '600',
   },
   disabledText: {
     color: Colors.textSecondary,

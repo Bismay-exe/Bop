@@ -1,12 +1,12 @@
 import { Tabs } from 'expo-router';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors, Spacing } from '../../constants';
-import Pill from '../../components/ui/Pill';
 import HomeIcon from '../../assets/icons/home.svg';
-import SearchIcon from '../../assets/icons/music-search.svg';
 import LibraryIcon from '../../assets/icons/library.svg';
+import SearchIcon from '../../assets/icons/music-search.svg';
 import SettingsIcon from '../../assets/icons/save-ribbon-outline.svg';
+import Pill from '../../components/ui/Pill';
+import { Colors, Spacing } from '../../constants';
 
 function CustomTabBar({ state, descriptors, navigation }: any) {
   // Routes: home, search, library, settings
@@ -34,6 +34,9 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 
             if (!isFocused && !event.defaultPrevented) {
               navigation.navigate(route.name, route.params);
+            } else if (isFocused && !event.defaultPrevented) {
+              // Pop to top of the stack if tapping the already focused tab
+              navigation.navigate(route.name, { screen: 'index' });
             }
           };
 
@@ -111,12 +114,12 @@ const styles = StyleSheet.create({
   },
   pill: {
     backgroundColor: '#222',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
   },
   pillActive: {
     backgroundColor: '#222',
     paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.lg,
   }
 });

@@ -1,21 +1,21 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing } from '../../../constants';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors, Spacing, Typography } from '../../../constants';
 
-import AppearanceSettings from '../../../components/settings/AppearanceSettings';
-import MotionSettings from '../../../components/settings/MotionSettings';
-import LyricsSettings from '../../../components/settings/LyricsSettings';
-import PlaybackSettings from '../../../components/settings/PlaybackSettings';
-import StorageSettings from '../../../components/settings/StorageSettings';
-import LibrarySettings from '../../../components/settings/LibrarySettings';
-import NotificationSettings from '../../../components/settings/NotificationSettings';
-import SleepTimerSettings from '../../../components/settings/SleepTimerSettings';
+import AboutSettings from '../../../components/settings/AboutSettings';
 import AccessibilitySettings from '../../../components/settings/AccessibilitySettings';
 import AdvancedSettings from '../../../components/settings/AdvancedSettings';
-import AboutSettings from '../../../components/settings/AboutSettings';
+import AppearanceSettings from '../../../components/settings/AppearanceSettings';
+import LibrarySettings from '../../../components/settings/LibrarySettings';
+import LyricsSettings from '../../../components/settings/LyricsSettings';
+import MotionSettings from '../../../components/settings/MotionSettings';
+import NotificationSettings from '../../../components/settings/NotificationSettings';
+import PlaybackSettings from '../../../components/settings/PlaybackSettings';
+import SleepTimerSettings from '../../../components/settings/SleepTimerSettings';
+import StorageSettings from '../../../components/settings/StorageSettings';
 
 const SETTINGS_COMPONENTS: Record<string, { title: string; Component: React.FC }> = {
   appearance: { title: 'Appearance', Component: AppearanceSettings },
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.md,
   },
   backButton: {

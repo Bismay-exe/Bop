@@ -33,7 +33,6 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.title,
     color: Colors.textSecondary,
-    fontWeight: '600',
     marginBottom: Spacing.sm,
     marginLeft: Spacing.xs,
     textTransform: 'uppercase',

@@ -1,6 +1,6 @@
 export const Colors = {
   background: '#F5F5F7',
-  surface: '#CFCFCF',
+  surface: '#e6e6e6ff',
   surfaceHover: '#EBEBF0',
   textPrimary: '#1D1D1F',
   textSecondary: '#999999',

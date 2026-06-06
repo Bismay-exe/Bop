@@ -1,29 +1,34 @@
-import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing } from '../../../constants';
+import { FlashList } from '@shopify/flash-list';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useLibraryStore } from '../../../store/libraryStore';
-import { 
-  useAlbums, useArtists, useFavorites, usePlaylists, 
-  useGenres, useYears, useFolders, useLanguages, useMoods, useRecentlyPlayed
-} from '../../../hooks/useLibrary';
-import { SongCard } from '../../../components/library/SongCard';
 import { AlbumCard } from '../../../components/library/AlbumCard';
 import { ArtistCard } from '../../../components/library/ArtistCard';
 import { PlaylistCard } from '../../../components/library/PlaylistCard';
+import { SongCard } from '../../../components/library/SongCard';
+import { Colors, Spacing, Typography } from '../../../constants';
+import {
+  useAlbums, useArtists, useFavorites,
+  useFolders,
+  useGenres,
+  useLanguages, useMoods,
+  usePlaylists,
+  useRecentlyPlayed,
+  useYears
+} from '../../../hooks/useLibrary';
 import { replaceQueueAndPlay } from '../../../services/TrackPlayerService';
+import { useLibraryStore } from '../../../store/libraryStore';
 import { Song } from '../../../types';
 
 export default function CategoryDetailScreen() {
   const { category } = useLocalSearchParams<{ category: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  
+
   const songs = useLibraryStore((s) => s.songs);
-  
+
   const playlists = usePlaylists();
   const artists = useArtists();
   const albums = useAlbums();
@@ -82,7 +87,7 @@ export default function CategoryDetailScreen() {
         return (
           <FlashList
             data={artists}
-            renderItem={({ item }) => <ArtistCard artist={item} onPress={() => {}} />}
+            renderItem={({ item }) => <ArtistCard artist={item} onPress={() => { }} />}
             keyExtractor={(item) => `artist-${item.name}`}
             contentContainerStyle={styles.listContent}
           />
@@ -94,7 +99,7 @@ export default function CategoryDetailScreen() {
             numColumns={2}
             renderItem={({ item }) => (
               <View style={styles.gridItem}>
-                <AlbumCard album={item} onPress={() => {}} />
+                <AlbumCard album={item} onPress={() => { }} />
               </View>
             )}
             keyExtractor={(item) => `album-${item.name}`}
@@ -158,7 +163,7 @@ export default function CategoryDetailScreen() {
         <Text style={styles.title}>{title}</Text>
         <View style={styles.backButton} />
       </View>
-      
+
       <View style={styles.contentContainer}>
         {renderContent()}
       </View>
@@ -175,7 +180,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.md,
   },
   backButton: {
@@ -224,7 +229,6 @@ const styles = StyleSheet.create({
   categoryName: {
     ...Typography.body,
     color: Colors.textPrimary,
-    fontWeight: '600',
   },
   categorySubtitle: {
     ...Typography.caption,

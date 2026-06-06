@@ -61,8 +61,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   artwork: {
-    width: 140,
-    height: 140,
+    width: 150,
+    height: 150,
     borderRadius: Radius.md,
     backgroundColor: Colors.surface,
     marginBottom: Spacing.sm,
@@ -77,7 +77,6 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.body,
     color: Colors.textPrimary,
-    fontWeight: '600',
     marginBottom: 2,
   },
   subtitle: {

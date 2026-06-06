@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radius } from '../../constants';
+import { useRef } from 'react';
+import { Keyboard, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Colors, Radius, Spacing, Typography } from '../../constants';
 
 interface SearchBarProps {
   value: string;
@@ -22,7 +22,7 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search...', auto
     <View style={styles.container}>
       <View style={styles.searchBox}>
         <Ionicons name="search" size={20} color={Colors.textSecondary} style={styles.icon} />
-        
+
         <TextInput
           ref={inputRef}
           style={styles.input}
@@ -49,7 +49,7 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search...', auto
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.sm,
     backgroundColor: Colors.background,
   },
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     height: 40,
   },
   icon: {

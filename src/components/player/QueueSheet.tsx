@@ -1,18 +1,16 @@
-  import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
-import Animated, { useAnimatedStyle, interpolate, Extrapolation } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Image as ExpoImage } from 'expo-image';
 import { FlashList } from '@shopify/flash-list';
-import { Colors, Spacing, Typography, Radius } from '../../constants';
+import { Image as ExpoImage } from 'expo-image';
+import { NativeScrollEvent, NativeSyntheticEvent, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import Animated, { Extrapolation, interpolate, useAnimatedStyle } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors, Radius, Spacing, Typography } from '../../constants';
 import { usePlayerAnimation } from '../../contexts/PlayerAnimationContext';
 import { usePlayer } from '../../hooks/usePlayer';
 import { useLibraryStore } from '../../store/libraryStore';
 import { Song } from '../../types';
 
 // We'll bring back a copy of PillsBar for the Queue Sheet top section
-import PlayerPillsBar from './PlayerPillsBar';
 
 export default function QueueSheet() {
   const { overlayProgress, overlayScrollY, overlayMode } = usePlayerAnimation();
@@ -39,7 +37,7 @@ export default function QueueSheet() {
       ],
     };
   });
-  
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     overlayScrollY.value = event.nativeEvent.contentOffset.y;
   };
@@ -47,9 +45,9 @@ export default function QueueSheet() {
   const renderItem = ({ item, index }: { item: Song & { queueId: string }, index: number }) => {
     const isPlaying = currentTrack?.id === item.id;
     const upToDateSong = librarySongs.find(s => s.id === item.id) || item;
-    
+
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[styles.itemContainer, isPlaying && styles.itemPlaying]}
         onPress={() => skip(index)}
       >
@@ -136,7 +134,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     borderRadius: 18,
   },
   itemPlaying: {

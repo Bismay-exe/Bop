@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...Typography.body,
-    fontWeight: '500',
     color: Colors.textSecondary,
   },
   iconButton: {

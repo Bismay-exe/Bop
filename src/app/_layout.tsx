@@ -20,6 +20,9 @@ export { ErrorBoundary };
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
+import TrackPlayer from 'react-native-track-player';
+TrackPlayer.registerPlaybackService(() => require('../services/playbackService'));
+
 function AnimatedAppContainer({ children }: { children: React.ReactNode }) {
   const { expandProgress } = usePlayerAnimation();
   const { height: currentHeight } = useWindowDimensions();
@@ -67,7 +70,7 @@ export default function RootLayout() {
       unsubscribeFocus = registerAudioFocusHandlers();
       
       // 4. Restore playback state (requires both store and TrackPlayer)
-      const { restorePlaybackSnapshot } = await import('../services/StorageService');
+      const { restorePlaybackSnapshot } = require('../services/StorageService');
       await restorePlaybackSnapshot();
     };
 

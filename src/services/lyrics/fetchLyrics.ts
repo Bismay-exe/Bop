@@ -35,19 +35,25 @@ export async function fetchLyrics(artist: string, title: string, signal?: AbortS
         signal.addEventListener('abort', onAbort);
       }
 
-      // Timeout policy: 5 seconds max to maintain premium feel
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      // Timeout policy: 10 seconds max
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       try {
         let data: any = null;
-        let response = await fetch(url, { signal: controller.signal });
+        let response = await fetch(url, { 
+          signal: controller.signal,
+          headers: { 'User-Agent': 'BopMusicApp/1.0.0 (https://github.com/bismay-exe/bop)' }
+        });
         
         if (response.ok) {
           data = await response.json();
         } else if (response.status === 404) {
           // Fallback to fuzzy search if exact match fails
           const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(normArtist + ' ' + normTitle)}`;
-          const searchResponse = await fetch(searchUrl, { signal: controller.signal });
+          const searchResponse = await fetch(searchUrl, { 
+            signal: controller.signal,
+            headers: { 'User-Agent': 'BopMusicApp/1.0.0 (https://github.com/bismay-exe/bop)' }
+          });
           
           if (searchResponse.ok) {
             const searchResults = await searchResponse.json();
@@ -77,7 +83,8 @@ export async function fetchLyrics(artist: string, title: string, signal?: AbortS
         if (signal) signal.removeEventListener('abort', onAbort);
       }
     } catch (e: any) {
-      if (e.name !== 'AbortError') {
+      const isAbort = e.name === 'AbortError' || (e.message && (e.message.includes('canceled') || e.message.includes('aborted')));
+      if (!isAbort) {
         console.warn('[fetchLyrics] Network or parse error:', e);
       }
       return null;

@@ -1,12 +1,12 @@
-import React, { useCallback, forwardRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import {
-  BottomSheetModal,
   BottomSheetBackdrop,
+  BottomSheetModal,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radius } from '../../constants';
+import { forwardRef, useCallback } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Colors, Radius, Spacing, Typography } from '../../constants';
 
 export interface MenuAction {
   id: string;
@@ -25,7 +25,7 @@ interface BottomSheetMenuProps {
 
 export const BottomSheetMenu = forwardRef<BottomSheetModal, BottomSheetMenuProps>(
   ({ title, subtitle, actions, onDismiss }, ref) => {
-    
+
     // Renders the semi-transparent backdrop behind the sheet
     const renderBackdrop = useCallback(
       (props: any) => (
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     width: 40,
   },
   contentContainer: {
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.xl * 2, // Extra padding for bottom inset
   },
   header: {
@@ -116,7 +116,6 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.title,
     color: Colors.textPrimary,
-    fontWeight: '700',
     textAlign: 'center',
   },
   subtitle: {
@@ -144,6 +143,5 @@ const styles = StyleSheet.create({
     ...Typography.body,
     marginLeft: Spacing.md,
     color: Colors.textPrimary,
-    fontWeight: '500',
   },
 });

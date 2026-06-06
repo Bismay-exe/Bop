@@ -100,18 +100,16 @@ export const Colors = {
 export const Typography = {
   displayLarge: {
     fontSize: 32,
-    fontWeight: "700" as const,
     letterSpacing: -0.5,
   },
   displayMedium: {
     fontSize: 24,
-    fontWeight: "700" as const,
     letterSpacing: -0.3,
   },
-  title: { fontSize: 18, fontWeight: "600" as const, letterSpacing: -0.2 },
-  body: { fontSize: 15, fontWeight: "400" as const, letterSpacing: 0 },
-  caption: { fontSize: 12, fontWeight: "400" as const, letterSpacing: 0.2 },
-  label: { fontSize: 11, fontWeight: "600" as const, letterSpacing: 0.8 },
+  title: { fontSize: 18, letterSpacing: -0.2 },
+  body: { fontSize: 15, letterSpacing: 0 },
+  caption: { fontSize: 12, letterSpacing: 0.2 },
+  label: { fontSize: 11, letterSpacing: 0.8 },
 };
 ```
 

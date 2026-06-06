@@ -11,6 +11,7 @@ import { usePlayerAnimation } from '../../contexts/PlayerAnimationContext';
 import { usePlayerLayoutStore } from '../../store/playerLayoutStore';
 import { usePlayerStore } from '../../store/playerStore';
 import { usePlayer } from '../../hooks/usePlayer';
+import { useLibraryStore } from '../../store/libraryStore';
 import ArtworkView from './ArtworkView';
 import ExpandedPlayer from './ExpandedPlayer';
 import MiniPlayer from './MiniPlayer';
@@ -34,6 +35,16 @@ export default function PersistentPlayer() {
   const isPlaying = usePlayerStore(state => state.playbackState === 'playing');
   const { position, duration } = useProgress();
   const progressPercent = duration > 0 ? (position / duration) * 100 : 0;
+
+  const favorites = useLibraryStore(state => state.favorites);
+  const toggleFavoriteStore = useLibraryStore(state => state.toggleFavorite);
+  const isLiked = currentTrack ? favorites.has(currentTrack.id) : false;
+
+  const handleToggleFavorite = () => {
+    if (currentTrack) {
+      toggleFavoriteStore(currentTrack.id);
+    }
+  };
 
   const { play, pause } = usePlayer();
   const togglePlayback = () => {
@@ -362,6 +373,10 @@ export default function PersistentPlayer() {
     };
   });
 
+  const ghostHeartProps = useAnimatedProps(() => ({
+    pointerEvents: expandProgress.value > 0.5 ? ('auto' as const) : ('none' as const),
+  }));
+
   const ghostPlayButtonStyle = useAnimatedStyle(() => {
     const opacity = overlayMode === 'queue' ? interpolate(overlayProgress.value, [0, 0.5, 1], [0, 0, 1]) : 0;
     return {
@@ -433,8 +448,15 @@ export default function PersistentPlayer() {
           {currentTrack?.artist || '—'}
         </Animated.Text>
 
-        <Animated.View style={ghostHeartStyle} pointerEvents="none">
-          <HeartIcon width={24} height={24} color={Colors.background} />
+        <Animated.View style={ghostHeartStyle} animatedProps={ghostHeartProps}>
+          <TouchableOpacity onPress={handleToggleFavorite} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <HeartIcon 
+              width={24} 
+              height={24} 
+              color={Colors.background} 
+              fill={isLiked ? Colors.background : "none"} 
+            />
+          </TouchableOpacity>
         </Animated.View>
 
         {/* Ghost Progress Bar (Only visible in Queue Top Header state) */}

@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Playlist } from '../../types';
-import { Colors, Typography, Spacing, Radius } from '../../constants';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Colors, Radius, Spacing, Typography } from '../../constants';
+import { Playlist } from '../../types';
 
 interface PlaylistCardProps {
   playlist: Playlist;
@@ -42,8 +42,8 @@ function PlaylistCardComponent({ playlist, onPress, onLongPress }: PlaylistCardP
 
 export const PlaylistCard = React.memo(PlaylistCardComponent, (prev, next) => {
   return prev.playlist.id === next.playlist.id &&
-         prev.playlist.name === next.playlist.name &&
-         prev.playlist.songIds.length === next.playlist.songIds.length;
+    prev.playlist.name === next.playlist.name &&
+    prev.playlist.songIds.length === next.playlist.songIds.length;
 });
 
 const styles = StyleSheet.create({
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     borderBottomWidth: 1,
     borderBottomColor: Colors.divider,
   },
@@ -71,7 +71,6 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.body,
     color: Colors.textPrimary,
-    fontWeight: '600',
     marginBottom: 2,
   },
   subtitle: {

@@ -1,14 +1,14 @@
-import React, { useCallback, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radius } from '../../constants';
-import { useLibraryStore } from '../../store/libraryStore';
+import { FlashList } from '@shopify/flash-list';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SongCard } from '../../components/library/SongCard';
 import { EmptyState } from '../../components/shared/EmptyState';
-import { replaceQueueAndPlay } from '../../services/TrackPlayerService';
+import { Colors, Spacing, Typography } from '../../constants';
 import { PlaylistService } from '../../services/PlaylistService';
+import { replaceQueueAndPlay } from '../../services/TrackPlayerService';
+import { useLibraryStore } from '../../store/libraryStore';
 import { Song } from '../../types';
 
 export default function PlaylistDetailScreen() {
@@ -63,8 +63,8 @@ export default function PlaylistDetailScreen() {
           <Text style={styles.title} numberOfLines={1}>{playlist.name}</Text>
           <Text style={styles.subtitle}>{validSongs.length} songs</Text>
         </View>
-        <TouchableOpacity 
-          style={styles.deleteButton} 
+        <TouchableOpacity
+          style={styles.deleteButton}
           onPress={() => PlaylistService.deletePlaylist(playlist.id)}
         >
           <Ionicons name="trash-outline" size={24} color={Colors.error || 'red'} />
@@ -86,8 +86,8 @@ export default function PlaylistDetailScreen() {
               <View style={styles.songCardWrapper}>
                 <SongCard song={item} onPress={handlePlaySong} />
               </View>
-              <TouchableOpacity 
-                style={styles.removeButton} 
+              <TouchableOpacity
+                style={styles.removeButton}
                 onPress={() => handleRemoveSong(item)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl + Spacing.md, // Account for status bar spacing
     paddingBottom: Spacing.md,
     borderBottomWidth: 1,
@@ -126,7 +126,6 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.title,
     color: Colors.textPrimary,
-    fontWeight: '700',
   },
   subtitle: {
     ...Typography.caption,

@@ -1,10 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors, Typography, Spacing, Radius } from '../../../constants';
-import SettingSection from '../../../components/settings/SettingSection';
-import SettingRow from '../../../components/settings/SettingRow';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import SettingRow from '../../../components/settings/SettingRow';
+import SettingSection from '../../../components/settings/SettingSection';
+import { Colors, Spacing, Typography } from '../../../constants';
 
 export default function SettingsIndexScreen() {
   const router = useRouter();
@@ -18,83 +17,83 @@ export default function SettingsIndexScreen() {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <SettingSection title="General">
-          <SettingRow 
-            icon="color-palette-outline" 
-            title="Appearance" 
+          <SettingRow
+            icon="color-palette-outline"
+            title="Appearance"
             subtitle="Theme, dynamic colors, artwork style"
-            onPress={() => router.push('/settings/appearance')} 
+            onPress={() => router.push('/settings/appearance')}
           />
-          <SettingRow 
-            icon="accessibility-outline" 
-            title="Motion & Gestures" 
+          <SettingRow
+            icon="accessibility-outline"
+            title="Motion & Gestures"
             subtitle="Animations, haptics, gesture behavior"
-            onPress={() => router.push('/settings/motion')} 
+            onPress={() => router.push('/settings/motion')}
           />
         </SettingSection>
 
         <SettingSection title="Audio & Playback">
-          <SettingRow 
-            icon="musical-notes-outline" 
-            title="Playback" 
+          <SettingRow
+            icon="musical-notes-outline"
+            title="Playback"
             subtitle="Crossfade, gapless, equalizer, behavior"
-            onPress={() => router.push('/settings/playback')} 
+            onPress={() => router.push('/settings/playback')}
           />
-          <SettingRow 
-            icon="mic-outline" 
-            title="Lyrics" 
+          <SettingRow
+            icon="mic-outline"
+            title="Lyrics"
             subtitle="Sync, auto-scroll, display style"
-            onPress={() => router.push('/settings/lyrics')} 
+            onPress={() => router.push('/settings/lyrics')}
           />
-          <SettingRow 
-            icon="time-outline" 
-            title="Sleep Timer" 
+          <SettingRow
+            icon="time-outline"
+            title="Sleep Timer"
             subtitle="Auto-stop playback after duration"
-            onPress={() => router.push('/settings/sleeptimer')} 
+            onPress={() => router.push('/settings/sleeptimer')}
           />
         </SettingSection>
 
         <SettingSection title="Data & Storage">
-          <SettingRow 
-            icon="library-outline" 
-            title="Library" 
+          <SettingRow
+            icon="library-outline"
+            title="Library"
             subtitle="Scan folders, sort defaults"
-            onPress={() => router.push('/settings/library')} 
+            onPress={() => router.push('/settings/library')}
           />
-          <SettingRow 
-            icon="cloud-download-outline" 
-            title="Downloads & Storage" 
+          <SettingRow
+            icon="cloud-download-outline"
+            title="Downloads & Storage"
             subtitle="Quality, location, cache"
-            onPress={() => router.push('/settings/storage')} 
+            onPress={() => router.push('/settings/storage')}
           />
         </SettingSection>
 
         <SettingSection title="App Preferences">
-          <SettingRow 
-            icon="notifications-outline" 
-            title="Notifications" 
+          <SettingRow
+            icon="notifications-outline"
+            title="Notifications"
             subtitle="System controls, widget"
-            onPress={() => router.push('/settings/notifications')} 
+            onPress={() => router.push('/settings/notifications')}
           />
-          <SettingRow 
-            icon="eye-outline" 
-            title="Accessibility" 
+          <SettingRow
+            icon="eye-outline"
+            title="Accessibility"
             subtitle="Text size, contrast"
-            onPress={() => router.push('/settings/accessibility')} 
+            onPress={() => router.push('/settings/accessibility')}
           />
-          <SettingRow 
-            icon="options-outline" 
-            title="Advanced" 
+          <SettingRow
+            icon="options-outline"
+            title="Advanced"
             subtitle="Battery, resets, diagnostics"
-            onPress={() => router.push('/settings/advanced')} 
+            onPress={() => router.push('/settings/advanced')}
           />
         </SettingSection>
 
         <SettingSection title="About">
-          <SettingRow 
-            icon="information-circle-outline" 
-            title="About Bop" 
+          <SettingRow
+            icon="information-circle-outline"
+            title="About Bop"
             subtitle="Version, licenses"
-            onPress={() => router.push('/settings/about')} 
+            onPress={() => router.push('/settings/about')}
           />
         </SettingSection>
       </ScrollView>
@@ -108,7 +107,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.md,
   },
   title: {
@@ -116,7 +115,7 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   content: {
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.xxxl * 2, // Space for bottom nav player
   },
 });

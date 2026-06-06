@@ -94,7 +94,7 @@ export async function writePlaybackSnapshot(): Promise<void> {
     
     const index = await TrackPlayer.getActiveTrackIndex() || 0;
     const progress = await TrackPlayer.getProgress();
-    const { usePlayerStore } = await import('../store/playerStore');
+    const { usePlayerStore } = require('../store/playerStore');
     const state = usePlayerStore.getState();
 
     const snapshot: PlaybackSnapshot = {
@@ -122,7 +122,7 @@ export async function restorePlaybackSnapshot(): Promise<void> {
       return;
     }
 
-    const { replaceQueueAndPlay } = await import('./TrackPlayerService');
+    const { replaceQueueAndPlay } = require('./TrackPlayerService');
     const allSongs = useLibraryStore.getState().songs;
 
     const restoredSongs = snapshot.queueSongIds

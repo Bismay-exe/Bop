@@ -1,10 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radius } from '../constants';
-import { useLibraryStore } from '../store/libraryStore';
+import { useRouter } from 'expo-router';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Colors, Radius, Spacing, Typography } from '../constants';
 import { scanLocalMusic } from '../services/MediaScannerService';
+import { useLibraryStore } from '../store/libraryStore';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -43,10 +42,10 @@ export default function SettingsScreen() {
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.sectionTitle}>Library & Storage</Text>
-        
+
         <View style={styles.card}>
-          <TouchableOpacity 
-            style={styles.row} 
+          <TouchableOpacity
+            style={styles.row}
             onPress={handleScan}
             disabled={isScanning}
           >
@@ -62,8 +61,8 @@ export default function SettingsScreen() {
 
           <View style={styles.divider} />
 
-          <TouchableOpacity 
-            style={styles.row} 
+          <TouchableOpacity
+            style={styles.row}
             onPress={handleScan}
             disabled={isScanning}
           >
@@ -89,7 +88,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl + Spacing.md,
     paddingBottom: Spacing.md,
     borderBottomWidth: 1,
@@ -101,7 +100,6 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.title,
     color: Colors.textPrimary,
-    fontWeight: '700',
   },
   content: {
     padding: Spacing.lg,
@@ -109,7 +107,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     ...Typography.title,
     color: Colors.textSecondary,
-    fontWeight: '600',
     marginBottom: Spacing.sm,
     marginLeft: Spacing.xs,
   },
@@ -138,7 +135,6 @@ const styles = StyleSheet.create({
   rowTitle: {
     ...Typography.body,
     color: Colors.textPrimary,
-    fontWeight: '600',
   },
   rowSubtitle: {
     ...Typography.caption,

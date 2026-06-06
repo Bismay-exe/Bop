@@ -1,13 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
-import { Song } from '../../types';
-import { Colors, Typography, Spacing, Radius } from '../../constants';
-import { queueMetadataExtraction } from '../../services/media/metadata';
-import { MediaCache } from '../../services/media/cache';
+import { Image } from 'expo-image';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Colors, Radius, Spacing, Typography } from '../../constants';
 import { getArtworkFilePath } from '../../services/media/artwork';
+import { MediaCache } from '../../services/media/cache';
+import { queueMetadataExtraction } from '../../services/media/metadata';
 import { useLibraryStore } from '../../store/libraryStore';
+import { Song } from '../../types';
 
 interface SongCardProps {
   song: Song;
@@ -95,10 +95,10 @@ function SongCardComponent({ song, onPress, onLongPress, isActive }: SongCardPro
 }
 
 export const SongCard = React.memo(SongCardComponent, (prev, next) => {
-  return prev.song.id === next.song.id && 
-         prev.isActive === next.isActive &&
-         prev.song.artwork === next.song.artwork &&
-         prev.song.title === next.song.title;
+  return prev.song.id === next.song.id &&
+    prev.isActive === next.isActive &&
+    prev.song.artwork === next.song.artwork &&
+    prev.song.title === next.song.title;
 });
 
 const styles = StyleSheet.create({
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     backgroundColor: Colors.background,
   },
   activeContainer: {
@@ -126,12 +126,10 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.body,
     color: Colors.textPrimary,
-    fontWeight: '500',
     marginBottom: 2,
   },
   activeText: {
     color: Colors.primary,
-    fontWeight: '700',
   },
   artist: {
     ...Typography.caption,

@@ -1,12 +1,12 @@
-import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radius } from '../../../constants';
-import { useLibraryStore } from '../../../store/libraryStore';
-import { scanLocalMusic } from '../../../services/MediaScannerService';
+import { useRouter } from 'expo-router';
+import { useCallback } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EmptyState } from '../../../components/shared/EmptyState';
+import { Colors, Radius, Spacing, Typography } from '../../../constants';
+import { scanLocalMusic } from '../../../services/MediaScannerService';
+import { useLibraryStore } from '../../../store/libraryStore';
 
 const CATEGORIES = [
   { id: 'playlists', title: 'Playlists', icon: 'musical-notes' },
@@ -26,7 +26,7 @@ const CATEGORIES = [
 export default function LibraryIndexScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  
+
   const songs = useLibraryStore((s) => s.songs);
   const isScanning = useLibraryStore((s) => s.isScanning);
   const isRefreshing = useLibraryStore((s) => s.isRefreshing);
@@ -35,7 +35,7 @@ export default function LibraryIndexScreen() {
   const handleRefresh = useCallback(async () => {
     try {
       setRefreshing(true);
-      const scannedSongs = await scanLocalMusic(() => {});
+      const scannedSongs = await scanLocalMusic(() => { });
       setSongs(scannedSongs);
       finalizeScan();
     } catch (err) {
@@ -47,7 +47,7 @@ export default function LibraryIndexScreen() {
   if (isScanning && !isRefreshing) {
     return <EmptyState permissionStatus="granted" />;
   }
-  
+
   if (songs.length === 0 && !isRefreshing) {
     return <EmptyState permissionStatus="granted" />;
   }
@@ -55,15 +55,15 @@ export default function LibraryIndexScreen() {
   return (
     <View style={styles.container}>
       <Text style={[styles.headerTitle, { paddingTop: Math.max(insets.top, Spacing.xl) }]}>Library</Text>
-      
-      <ScrollView 
+
+      <ScrollView
         contentContainerStyle={styles.gridContainer}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={Colors.primary} />}
       >
         <View style={styles.grid}>
           {CATEGORIES.map((cat) => (
-            <TouchableOpacity 
-              key={cat.id} 
+            <TouchableOpacity
+              key={cat.id}
               style={styles.card}
               onPress={() => router.push(`/library/${cat.id}`)}
               activeOpacity={0.7}
@@ -88,11 +88,11 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...Typography.displayLarge,
     color: Colors.textPrimary,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.md,
   },
   gridContainer: {
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.xxl * 2, // Space for miniplayer
   },
   grid: {
@@ -116,7 +116,6 @@ const styles = StyleSheet.create({
   cardTitle: {
     ...Typography.title,
     color: Colors.textPrimary,
-    fontWeight: '600',
     textAlign: 'center',
   },
 });
