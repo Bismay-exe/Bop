@@ -21,12 +21,12 @@ export const Typography = {
   },
   bodyMedium: {
     fontFamily: 'Medium',
-    fontSize: 15,
+    fontSize: 16,
     letterSpacing: 0,
   },
   caption: {
     fontFamily: 'Regular',
-    fontSize: 12,
+    fontSize: 14,
     letterSpacing: 0.2,
   },
   label: {

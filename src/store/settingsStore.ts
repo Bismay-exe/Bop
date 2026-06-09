@@ -12,6 +12,7 @@ export type GestureSensitivity = 'low' | 'medium' | 'high';
 export type MiniPlayerStyle = 'floating' | 'docked';
 export type SwipeBehavior = 'collapse' | 'dismiss';
 export type RescanFrequency = 'startup' | 'manual' | 'daily';
+export type LibraryViewMode = 'grid' | 'list';
 
 export interface SettingsData {
   // Motion & Gestures
@@ -43,6 +44,8 @@ export interface SettingsData {
   // Library
   sortOrder: SortOrder;
   ignoredFolders: string[];
+  albumsViewMode: LibraryViewMode;
+  artistsViewMode: LibraryViewMode;
 
   // Notifications
   showPlaybackControls: boolean;
@@ -76,6 +79,8 @@ export const DEFAULT_SETTINGS: SettingsData = {
 
   sortOrder: 'artist',
   ignoredFolders: [],
+  albumsViewMode: 'grid',
+  artistsViewMode: 'grid',
 
   showPlaybackControls: true,
 
@@ -104,7 +109,7 @@ function pickData(state: SettingsData): SettingsData {
     syncedLyrics, autoScrollLyrics, lyricsFontSize, lyricsBlurIntensity, lyricsBackground,
     gaplessPlayback, playbackSpeed, resumeOnHeadphones, autoplayBluetooth, rememberQueue, resumeLastSession,
     sleepDefaultMinutes, sleepFadeOut,
-    sortOrder, ignoredFolders,
+    sortOrder, ignoredFolders, albumsViewMode, artistsViewMode,
     showPlaybackControls,
     rescanFrequency,
   } = state;
@@ -113,7 +118,7 @@ function pickData(state: SettingsData): SettingsData {
     syncedLyrics, autoScrollLyrics, lyricsFontSize, lyricsBlurIntensity, lyricsBackground,
     gaplessPlayback, playbackSpeed, resumeOnHeadphones, autoplayBluetooth, rememberQueue, resumeLastSession,
     sleepDefaultMinutes, sleepFadeOut,
-    sortOrder, ignoredFolders,
+    sortOrder, ignoredFolders, albumsViewMode, artistsViewMode,
     showPlaybackControls,
     rescanFrequency,
   };
