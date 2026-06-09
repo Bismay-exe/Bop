@@ -12,6 +12,8 @@ interface SettingRowProps {
   onPress?: () => void;
   onValueChange?: (value: boolean) => void;
   disabled?: boolean;
+  badge?: string;
+  destructive?: boolean;
 }
 
 export default function SettingRow({
@@ -23,6 +25,8 @@ export default function SettingRow({
   onPress,
   onValueChange,
   disabled = false,
+  badge,
+  destructive = false,
 }: SettingRowProps) {
   const content = (
     <>
@@ -32,25 +36,30 @@ export default function SettingRow({
         </View>
       )}
       <View style={styles.textContainer}>
-        <Text style={[styles.title, disabled && styles.disabledText]}>{title}</Text>
+        <Text style={[styles.title, disabled && styles.disabledText, destructive && styles.destructiveText]}>{title}</Text>
         {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
       </View>
       <View style={styles.actionContainer}>
-        {type === 'link' && (
-          <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
-        )}
-        {type === 'value' && (
-          <View style={styles.valueRow}>
-            <Text style={styles.valueText}>{value}</Text>
-            <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+        {badge && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{badge}</Text>
           </View>
         )}
-        {type === 'toggle' && (
+        {!badge && type === 'link' && (
+          <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+        )}
+        {!badge && type === 'value' && (
+          <View style={styles.valueRow}>
+            <Text style={styles.valueText}>{value}</Text>
+            {!disabled && <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />}
+          </View>
+        )}
+        {!badge && type === 'toggle' && (
           <Switch
             value={!!value}
             onValueChange={onValueChange}
             disabled={disabled}
-            trackColor={{ false: 'rgba(255,255,255,0.1)', true: Colors.primary }}
+            trackColor={{ false: 'rgba(120,120,128,0.32)', true: Colors.primary }}
             thumbColor={'#FFFFFF'}
           />
         )}
@@ -101,6 +110,19 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   disabledText: {
+    color: Colors.textSecondary,
+  },
+  destructiveText: {
+    color: Colors.error,
+  },
+  badge: {
+    backgroundColor: Colors.surfaceHover,
+    borderRadius: Radius.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+  },
+  badgeText: {
+    ...Typography.caption,
     color: Colors.textSecondary,
   },
   subtitle: {

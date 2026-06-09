@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState } from 'react';
 import { SharedValue, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
+import { useSettingsStore } from '../store/settingsStore';
+
+// When "Reduce Motion" is on, transitions snap instantly instead of animating.
+function motionDuration(ms: number): number {
+  return useSettingsStore.getState().reduceMotion ? 0 : ms;
+}
 
 export type PlayerTransitionState = 'collapsed' | 'expanding' | 'expanded' | 'collapsing';
 
@@ -39,14 +45,15 @@ export function PlayerAnimationProvider({ children }: { children: React.ReactNod
       // If clicking the same overlay that is already open -> Close it
       if (overlayMode === mode) {
         setOverlayState('closing');
+        const d = motionDuration(400);
         overlayProgress.value = withTiming(0, {
-          duration: 400,
+          duration: d,
           easing: Easing.bezier(0.25, 0.1, 0.25, 1)
         });
         setTimeout(() => {
           setOverlayState('closed');
           setOverlayMode('none');
-        }, 400);
+        }, d);
       } else {
         // If switching overlays, swap mode instantly
         setOverlayMode(mode);
@@ -55,11 +62,12 @@ export function PlayerAnimationProvider({ children }: { children: React.ReactNod
       // Opening a new overlay
       setOverlayMode(mode);
       setOverlayState('opening');
+      const d = motionDuration(400);
       overlayProgress.value = withTiming(1, {
-        duration: 400,
+        duration: d,
         easing: Easing.bezier(0.25, 0.1, 0.25, 1)
       });
-      setTimeout(() => setOverlayState('open'), 400);
+      setTimeout(() => setOverlayState('open'), d);
     }
   }, [overlayState, overlayMode, overlayProgress]);
 
@@ -72,23 +80,25 @@ export function PlayerAnimationProvider({ children }: { children: React.ReactNod
   const collapseCurrentLayer = React.useCallback(() => {
     if (overlayStateRef.current !== 'closed' && overlayStateRef.current !== 'closing') {
       setOverlayState('closing');
+      const d = motionDuration(300);
       overlayProgress.value = withTiming(0, {
-        duration: 300,
+        duration: d,
         easing: Easing.bezier(0.32, 0.72, 0, 1)
       });
       setTimeout(() => {
         setOverlayState('closed');
         setOverlayMode('none');
-      }, 300);
+      }, d);
       return true;
     }
     if (transitionStateRef.current !== 'collapsed' && transitionStateRef.current !== 'collapsing') {
       setTransitionState('collapsing');
+      const d = motionDuration(300);
       expandProgress.value = withTiming(0, {
-        duration: 300,
+        duration: d,
         easing: Easing.bezier(0.32, 0.72, 0, 1)
       });
-      setTimeout(() => setTransitionState('collapsed'), 300);
+      setTimeout(() => setTransitionState('collapsed'), d);
       return true;
     }
     return false;

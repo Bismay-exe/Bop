@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import ErrorBoundary from './ErrorBoundary';
 import { useLibraryStore } from '../store/libraryStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { setupTrackPlayer, startEventSync } from '../services/TrackPlayerService';
 import { registerAudioFocusHandlers } from '../services/AudioFocusService';
 import { PlayerAnimationProvider, usePlayerAnimation } from '../contexts/PlayerAnimationContext';
@@ -59,19 +60,24 @@ export default function RootLayout() {
     let unsubscribeFocus: (() => void) | undefined;
 
     const initApp = async () => {
+      // 0. Load persisted user settings (synchronous MMKV read)
+      useSettingsStore.getState().hydrate();
+
       // 1. Hydrate library first (we need songs to restore playback)
       await hydrate();
-      
+
       // 2. Setup TrackPlayer singleton
       await setupTrackPlayer();
-      
+
       // 3. Start listeners
       unsubscribeEvents = startEventSync();
       unsubscribeFocus = registerAudioFocusHandlers();
-      
+
       // 4. Restore playback state (requires both store and TrackPlayer)
-      const { restorePlaybackSnapshot } = require('../services/StorageService');
-      await restorePlaybackSnapshot();
+      if (useSettingsStore.getState().resumeLastSession) {
+        const { restorePlaybackSnapshot } = require('../services/StorageService');
+        await restorePlaybackSnapshot();
+      }
     };
 
     initApp();

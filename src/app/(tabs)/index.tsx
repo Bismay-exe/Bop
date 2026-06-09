@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Spacing } from '../../constants';
 import { useLibraryStore } from '../../store/libraryStore';
+import { useSettingsStore } from '../../store/settingsStore';
 import { scanLocalMusic } from '../../services/MediaScannerService';
 import * as MediaLibrary from 'expo-media-library/legacy';
 import { EmptyState } from '../../components/shared/EmptyState';
@@ -38,6 +39,20 @@ export default function HomeScreen() {
   // Automatic background scan on mount if permissions were already granted
   useEffect(() => {
     let mounted = true;
+
+    // Honor the user's "Rescan Library Frequency" setting.
+    const frequency = useSettingsStore.getState().rescanFrequency;
+    if (frequency === 'manual') {
+      return () => { mounted = false; };
+    }
+    if (frequency === 'daily') {
+      const last = useLibraryStore.getState().lastScanned ?? 0;
+      const dayMs = 24 * 60 * 60 * 1000;
+      if (Date.now() - last < dayMs) {
+        return () => { mounted = false; };
+      }
+    }
+
     const runBackgroundScan = async () => {
       try {
         const { status } = await MediaLibrary.getPermissionsAsync();

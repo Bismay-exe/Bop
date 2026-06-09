@@ -1,5 +1,6 @@
 import TrackPlayer, { Event } from 'react-native-track-player';
 import { usePlayerStore } from '../store/playerStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { writePlaybackSnapshot } from './StorageService';
 
 /**
@@ -18,6 +19,11 @@ export function registerAudioFocusHandlers(): () => void {
     } else {
       // Focus restored
       await TrackPlayer.setVolume(1.0);
+      // Auto-resume on device reconnect when the user opted in.
+      const settings = useSettingsStore.getState();
+      if (settings.resumeOnHeadphones || settings.autoplayBluetooth) {
+        await TrackPlayer.play();
+      }
     }
   });
 

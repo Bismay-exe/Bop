@@ -12,6 +12,8 @@ import { usePlayerLayoutStore } from '../../store/playerLayoutStore';
 import { usePlayerStore } from '../../store/playerStore';
 import { usePlayer } from '../../hooks/usePlayer';
 import { useLibraryStore } from '../../store/libraryStore';
+import { useSettingsStore } from '../../store/settingsStore';
+import { Haptic } from '../../services/haptics';
 import ArtworkView from './ArtworkView';
 import ExpandedPlayer from './ExpandedPlayer';
 import MiniPlayer from './MiniPlayer';
@@ -42,6 +44,7 @@ export default function PersistentPlayer() {
 
   const handleToggleFavorite = () => {
     if (currentTrack) {
+      Haptic.medium();
       toggleFavoriteStore(currentTrack.id);
     }
   };
@@ -59,20 +62,21 @@ export default function PersistentPlayer() {
   const touchStartY = useSharedValue(0);
 
   const togglePlayer = () => {
+    const d = useSettingsStore.getState().reduceMotion ? 0 : 400;
     if (transitionState === 'expanded' || transitionState === 'expanding') {
       setTransitionState('collapsing');
       expandProgress.value = withTiming(0, {
-        duration: 400,
+        duration: d,
         easing: Easing.bezier(0.25, 0.1, 0.25, 1)
       });
-      setTimeout(() => setTransitionState('collapsed'), 400);
+      setTimeout(() => setTransitionState('collapsed'), d);
     } else {
       setTransitionState('expanding');
       expandProgress.value = withTiming(1, {
-        duration: 400,
+        duration: d,
         easing: Easing.bezier(0.25, 0.1, 0.25, 1)
       });
-      setTimeout(() => setTransitionState('expanded'), 400);
+      setTimeout(() => setTransitionState('expanded'), d);
     }
   };
 

@@ -10,11 +10,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing } from '../../constants';
 import { usePlayerAnimation } from '../../contexts/PlayerAnimationContext';
 import { usePlayerStore } from '../../store/playerStore';
+import { useSettingsStore } from '../../store/settingsStore';
 import { LyricsLine } from '../../types';
 
 import { SharedValue } from 'react-native-reanimated';
 
-const LyricsRow = React.memo(({ item, index, activeLineIndex }: { item: LyricsLine; index: number; activeLineIndex: SharedValue<number> }) => {
+const FONT_SIZE_MAP = { small: 22, medium: 28, large: 34 } as const;
+const BLUR_INTENSITY_MAP = { low: 10, medium: 20, high: 35 } as const;
+
+const LyricsRow = React.memo(({ item, index, activeLineIndex, fontSize }: { item: LyricsLine; index: number; activeLineIndex: SharedValue<number>; fontSize: number }) => {
   if (item.isSectionHeader) {
     return (
       <View style={styles.sectionHeaderContainer}>
@@ -25,7 +29,7 @@ const LyricsRow = React.memo(({ item, index, activeLineIndex }: { item: LyricsLi
 
   const animatedStyle = useAnimatedStyle(() => {
     const distance = Math.abs(activeLineIndex.value - index);
-    
+
     let opacity = 0.2; // Distant
     if (activeLineIndex.value === -1) {
       opacity = 0.6; // Fallback if no active line
@@ -42,12 +46,12 @@ const LyricsRow = React.memo(({ item, index, activeLineIndex }: { item: LyricsLi
 
   return (
     <View style={styles.rowContainer}>
-      <Animated.Text style={[styles.lineText, animatedStyle, { color: '#FFFFFF' }]}>
+      <Animated.Text style={[styles.lineText, animatedStyle, { color: '#FFFFFF', fontSize }]}>
         {item.text}
       </Animated.Text>
     </View>
   );
-}, (prev, next) => prev.item.text === next.item.text && prev.index === next.index);
+}, (prev, next) => prev.item.text === next.item.text && prev.index === next.index && prev.fontSize === next.fontSize);
 
 export default function LyricsSheet() {
   const { overlayProgress, overlayScrollY, overlayMode, setOverlayState, setOverlayMode } = usePlayerAnimation();
@@ -56,9 +60,22 @@ export default function LyricsSheet() {
   const currentTrack = usePlayerStore(state => state.currentTrack);
   const onlineLyrics = usePlayerStore(state => state.onlineLyrics);
   const isFetchingLyrics = usePlayerStore(state => state.isFetchingLyrics);
-  
-  // Prioritize embedded lyrics, then synced online, then plain online
-  const lyrics = currentTrack?.lyrics || onlineLyrics?.syncedLyrics || onlineLyrics?.plainLyrics || [];
+
+  const syncedEnabled = useSettingsStore(state => state.syncedLyrics);
+  const autoScrollEnabled = useSettingsStore(state => state.autoScrollLyrics);
+  const fontSizeSetting = useSettingsStore(state => state.lyricsFontSize);
+  const blurSetting = useSettingsStore(state => state.lyricsBlurIntensity);
+  const backgroundSetting = useSettingsStore(state => state.lyricsBackground);
+  const reduceMotion = useSettingsStore(state => state.reduceMotion);
+
+  const lineFontSize = FONT_SIZE_MAP[fontSizeSetting];
+  const blurIntensity = reduceMotion ? 0 : BLUR_INTENSITY_MAP[blurSetting];
+
+  // Prioritize embedded lyrics, then (if enabled) synced online, then plain online.
+  const lyrics = currentTrack?.lyrics
+    || (syncedEnabled ? onlineLyrics?.syncedLyrics : undefined)
+    || onlineLyrics?.plainLyrics
+    || [];
   
   const { position } = useProgress(250); // update every 250ms
   const listRef = React.useRef<any>(null);
@@ -85,9 +102,9 @@ export default function LyricsSheet() {
     
     if (sharedActiveLineIndex.value !== newIndex) {
       sharedActiveLineIndex.value = newIndex;
-      
+
       // Stabilization micro-delay before scroll (50-120ms)
-      if (!userIsScrolling.current && listRef.current) {
+      if (autoScrollEnabled && !userIsScrolling.current && listRef.current) {
         setTimeout(() => {
           if (!userIsScrolling.current && listRef.current) {
             listRef.current.scrollToIndex({
@@ -99,7 +116,7 @@ export default function LyricsSheet() {
         }, 100);
       }
     }
-  }, [lyrics, position]);
+  }, [lyrics, position, autoScrollEnabled]);
 
   const handleScrollBeginDrag = useCallback(() => {
     userIsScrolling.current = true;
@@ -114,7 +131,7 @@ export default function LyricsSheet() {
     scrollTimeoutRef.current = setTimeout(() => {
       userIsScrolling.current = false;
       // Optionally snap back immediately if we have an active line
-      if (listRef.current && sharedActiveLineIndex.value !== -1) {
+      if (autoScrollEnabled && listRef.current && sharedActiveLineIndex.value !== -1) {
          listRef.current.scrollToIndex({
             index: sharedActiveLineIndex.value,
             animated: true,
@@ -122,7 +139,7 @@ export default function LyricsSheet() {
          });
       }
     }, 3000);
-  }, [sharedActiveLineIndex]);
+  }, [sharedActiveLineIndex, autoScrollEnabled]);
 
   const topHeaderHeight = Math.max(insets.top, 24) + 56 + 32;
   const bottomControlsHeight = Math.max(insets.bottom, 58) + 120; // Approx height for PlaybackControls + progress bar
@@ -148,11 +165,14 @@ export default function LyricsSheet() {
   };
 
   const renderItem = useCallback(({ item, index }: { item: LyricsLine, index: number }) => {
-    return <LyricsRow item={item} index={index} activeLineIndex={sharedActiveLineIndex} />;
-  }, [sharedActiveLineIndex]);
+    return <LyricsRow item={item} index={index} activeLineIndex={sharedActiveLineIndex} fontSize={lineFontSize} />;
+  }, [sharedActiveLineIndex, lineFontSize]);
 
   return (
-    <Animated.View style={[styles.container, animatedStyle]} pointerEvents={overlayMode === 'lyrics' ? 'auto' : 'none'}>
+    <Animated.View
+      style={[styles.container, backgroundSetting === 'solid' && styles.solidBackground, animatedStyle]}
+      pointerEvents={overlayMode === 'lyrics' ? 'auto' : 'none'}
+    >
         {lyrics.length > 0 ? (
           <FlashList
             ref={listRef}
@@ -181,7 +201,7 @@ export default function LyricsSheet() {
 
         {/* Top Header Blur & Gradient Protector */}
         <Animated.View style={[styles.blurTop, { height: topHeaderHeight + 5 }]} pointerEvents="auto">
-          <BlurView intensity={20} style={StyleSheet.absoluteFill} tint="dark" />
+          <BlurView intensity={blurIntensity} style={StyleSheet.absoluteFill} tint="dark" />
           <LinearGradient
             colors={['rgba(0, 0, 0, 1)', 'rgba(0, 0, 0, 1)', 'rgba(0, 0, 0, 1)', 'transparent']}
             style={StyleSheet.absoluteFill}
@@ -190,7 +210,7 @@ export default function LyricsSheet() {
 
         {/* Bottom Controls Blur & Gradient Protector */}
         <Animated.View style={[styles.blurBottom, { height: bottomControlsHeight + 25 }]} pointerEvents="auto">
-          <BlurView intensity={20} style={StyleSheet.absoluteFill} tint="dark" />
+          <BlurView intensity={blurIntensity} style={StyleSheet.absoluteFill} tint="dark" />
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,1)', 'rgba(0,0,0,1)', 'rgba(0,0,0,1)', 'rgba(0,0,0,1)']}
             style={StyleSheet.absoluteFill}
@@ -209,6 +229,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: 'transparent',
     zIndex: 15,
+  },
+  solidBackground: {
+    backgroundColor: '#000000',
   },
   rowContainer: {
     paddingVertical: Spacing.sm * 1.5,

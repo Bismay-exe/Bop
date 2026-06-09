@@ -101,8 +101,11 @@ useLibraryStore.setState({
 
 export async function writePlaybackSnapshot(): Promise<void> {
   try {
+    const { useSettingsStore } = require('../store/settingsStore');
+    if (!useSettingsStore.getState().rememberQueue) return;
+
     const queue = await TrackPlayer.getQueue();
-    if (queue.length === 0) return; 
+    if (queue.length === 0) return;
     
     const index = await TrackPlayer.getActiveTrackIndex() || 0;
     const progress = await TrackPlayer.getProgress();

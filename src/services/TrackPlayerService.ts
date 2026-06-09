@@ -9,8 +9,28 @@ import { Song, PlaybackState as CustomPlaybackState } from '../types';
 import { usePlayerStore } from '../store/playerStore';
 import { prefetchLyricsForTrack } from './lyrics/lyricsPrefetch';
 import { useLibraryStore } from '../store/libraryStore';
+import { useSettingsStore } from '../store/settingsStore';
 
 let isSetup = false;
+
+const FULL_CAPABILITIES = [
+  Capability.Play,
+  Capability.Pause,
+  Capability.SkipToNext,
+  Capability.SkipToPrevious,
+  Capability.SeekTo,
+  Capability.Stop,
+];
+
+function buildOptions(showControls: boolean) {
+  return {
+    android: {
+      appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+      alwaysPauseOnInterruption: true, // Crucial for Audio Focus (e.g. unplug headphones)
+    },
+    capabilities: showControls ? FULL_CAPABILITIES : [],
+  };
+}
 
 export async function setupTrackPlayer(): Promise<void> {
   if (isSetup) return;
@@ -18,25 +38,37 @@ export async function setupTrackPlayer(): Promise<void> {
   try {
     await TrackPlayer.setupPlayer();
 
-    await TrackPlayer.updateOptions({
-      android: {
-        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
-        alwaysPauseOnInterruption: true, // Crucial for Audio Focus (e.g. unplug headphones)
-      },
-      capabilities: [
-        Capability.Play,
-        Capability.Pause,
-        Capability.SkipToNext,
-        Capability.SkipToPrevious,
-        Capability.SeekTo,
-        Capability.Stop,
-      ],
-    });
+    const showControls = useSettingsStore.getState().showPlaybackControls;
+    await TrackPlayer.updateOptions(buildOptions(showControls));
 
     isSetup = true;
     console.log('[TrackPlayerService] Successfully initialized');
   } catch (error) {
     console.error('[TrackPlayerService] Setup failed:', error);
+  }
+}
+
+/**
+ * Re-applies notification/lock-screen controls based on the user's setting.
+ */
+export async function applyNotificationControls(showControls: boolean): Promise<void> {
+  if (!isSetup) return;
+  try {
+    await TrackPlayer.updateOptions(buildOptions(showControls));
+  } catch (error) {
+    console.error('[TrackPlayerService] applyNotificationControls failed:', error);
+  }
+}
+
+/**
+ * Sets playback speed (0.5x–2.0x). Persisted speed is re-applied after each load.
+ */
+export async function setPlaybackRate(rate: number): Promise<void> {
+  if (!isSetup) return;
+  try {
+    await TrackPlayer.setRate(rate);
+  } catch (error) {
+    console.error('[TrackPlayerService] setPlaybackRate failed:', error);
   }
 }
 
@@ -127,6 +159,12 @@ export async function replaceQueueAndPlay(songs: Song[], startIndex: number = 0)
     await TrackPlayer.skip(startIndex);
     await TrackPlayer.setVolume(1.0); // Ensure volume is fully restored
     await TrackPlayer.play();
+
+    // Re-apply the user's chosen playback speed (resets to 1.0 on a fresh queue otherwise).
+    const rate = useSettingsStore.getState().playbackSpeed;
+    if (rate !== 1.0) {
+      await TrackPlayer.setRate(rate);
+    }
   } catch (error) {
     console.error('[TrackPlayerService] replaceQueueAndPlay failed:', error);
   }

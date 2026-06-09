@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import { Colors, Radius } from '../../constants';
 import { usePlayer } from '../../hooks/usePlayer';
+import { Haptic } from '../../services/haptics';
 
 import ShuffleIcon from '../../assets/icons/shuffle.svg';
 import RepeatIcon from '../../assets/icons/repeat.svg';
@@ -14,6 +15,20 @@ import NextIcon from '../../assets/icons/next.svg';
 export default function PlaybackControls() {
   const { isPlaying, play, pause, next, prev } = usePlayer();
   const radius = useSharedValue(isPlaying ? 24 : 40);
+
+  const handlePlayPause = () => {
+    Haptic.light();
+    if (isPlaying) pause();
+    else play();
+  };
+  const handleNext = () => {
+    Haptic.light();
+    next();
+  };
+  const handlePrev = () => {
+    Haptic.light();
+    prev();
+  };
 
   useEffect(() => {
     radius.value = withTiming(
@@ -33,13 +48,13 @@ export default function PlaybackControls() {
       </TouchableOpacity>
 
       {/* Prev */}
-      <TouchableOpacity onPress={prev} style={styles.circleButton}>
+      <TouchableOpacity onPress={handlePrev} style={styles.circleButton}>
         <PrevIcon width={24} height={24} color={Colors.background} />
       </TouchableOpacity>
 
       {/* Play/Pause */}
       <TouchableOpacity
-        onPress={isPlaying ? pause : play}
+        onPress={handlePlayPause}
         style={[
           styles.playButton,
           {
@@ -55,7 +70,7 @@ export default function PlaybackControls() {
       </TouchableOpacity>
 
       {/* Next */}
-      <TouchableOpacity onPress={next} style={styles.circleButton}>
+      <TouchableOpacity onPress={handleNext} style={styles.circleButton}>
         <NextIcon width={24} height={24} color={Colors.background} />
       </TouchableOpacity>
 

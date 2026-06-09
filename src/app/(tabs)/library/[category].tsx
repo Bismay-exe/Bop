@@ -16,10 +16,10 @@ import {
   useLanguages, useMoods,
   usePlaylists,
   useRecentlyPlayed,
+  useSongs,
   useYears
 } from '../../../hooks/useLibrary';
 import { replaceQueueAndPlay } from '../../../services/TrackPlayerService';
-import { useLibraryStore } from '../../../store/libraryStore';
 import { Song } from '../../../types';
 
 export default function CategoryDetailScreen() {
@@ -27,7 +27,7 @@ export default function CategoryDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const songs = useLibraryStore((s) => s.songs);
+  const songs = useSongs();
 
   const playlists = usePlaylists();
   const artists = useArtists();
