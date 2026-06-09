@@ -1,22 +1,31 @@
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import PauseIcon from '../../assets/icons/pause.svg';
+import PlayIcon from '../../assets/icons/play.svg';
 import { Colors, Radius, Spacing, Typography } from '../../constants';
 import { useRecentlyPlayed } from '../../hooks/useLibrary';
-import { replaceQueueAndPlay } from '../../services/TrackPlayerService';
+import { usePlayer } from '../../hooks/usePlayer';
+import { replaceQueueAndPlay, togglePlayback } from '../../services/TrackPlayerService';
 import { useLibraryStore } from '../../store/libraryStore';
+import ProgressBar from '../player/ProgressBar';
 
 export function HeroCard() {
   const recentlyPlayed = useRecentlyPlayed();
   const songs = useLibraryStore((s) => s.songs);
+  const { currentTrack, playbackState } = usePlayer();
+  const isPlaying = playbackState === 'playing';
 
-  // Fallback to the first song in the library if there's no play history yet
-  const song = recentlyPlayed.length > 0 ? recentlyPlayed[0] : (songs.length > 0 ? songs[0] : null);
+  // Show active track if playing/paused in current session, else fallback to recent
+  const song = currentTrack || (recentlyPlayed.length > 0 ? recentlyPlayed[0] : (songs.length > 0 ? songs[0] : null));
 
   if (!song) return null;
 
   const handlePlay = async () => {
-    await replaceQueueAndPlay([song], 0);
+    if (currentTrack && currentTrack.id === song.id) {
+      await togglePlayback();
+    } else {
+      await replaceQueueAndPlay([song], 0);
+    }
   };
 
   const imageSource = song.artwork
@@ -29,7 +38,7 @@ export function HeroCard() {
         <Image source={imageSource} style={styles.imageBackground} />
 
         <LinearGradient
-          colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.8)']}
+          colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,1)']}
           style={StyleSheet.absoluteFill}
         />
 
@@ -43,13 +52,18 @@ export function HeroCard() {
             </View>
 
             <TouchableOpacity style={styles.playButton} onPress={handlePlay}>
-              <Ionicons name="play" size={24} color={Colors.textPrimary} style={{ marginLeft: 3 }} />
+              {isPlaying && currentTrack?.id === song.id ? (
+                <PauseIcon width={24} height={24} color={Colors.textPrimary} />
+              ) : (
+                <View style={{ paddingLeft: 4 }}>
+                  <PlayIcon width={24} height={24} color={Colors.textPrimary} />
+                </View>
+              )}
             </TouchableOpacity>
           </View>
 
-          {/* Progress bar placeholder */}
-          <View style={styles.progressTrack}>
-            <View style={styles.progressFill} />
+          <View style={styles.progressContainer}>
+            <ProgressBar variant="mini" />
           </View>
         </View>
       </TouchableOpacity>
@@ -90,14 +104,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'space-between',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   textContainer: {
     flex: 1,
     marginRight: Spacing.md,
   },
   title: {
-    ...Typography.displayMedium,
+    fontFamily: 'Semibold',
+    fontSize: 24,
     color: '#FFFFFF',
     marginBottom: 4,
   },
@@ -113,19 +128,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  progressTrack: {
-    height: 4,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    borderRadius: 2,
+  progressContainer: {
     position: 'absolute',
     bottom: Spacing.md,
     left: Spacing.lg,
     right: Spacing.lg,
-  },
-  progressFill: {
-    width: '40%', // Placeholder progress
-    height: '100%',
-    backgroundColor: '#FFA500', // Assuming a brand accent color or just orange for now
-    borderRadius: 2,
   },
 });

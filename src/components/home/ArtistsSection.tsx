@@ -1,24 +1,27 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Colors, Typography, Spacing } from '../../constants';
 import { useArtists } from '../../hooks/useLibrary';
 import { ArtistCircle } from './ArtistCircle';
 
-export function FavouriteArtistsSection() {
+export function ArtistsSection() {
   const artists = useArtists();
   
-  if (artists.length === 0) return null;
+  const randomArtists = useMemo(() => {
+    if (artists.length === 0) return [];
+    const shuffled = [...artists].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 10);
+  }, [artists]);
 
-  // Let's take the top 10 artists.
-  const favoriteArtists = artists.slice(0, 10);
+  if (randomArtists.length === 0) return null;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Favourite Artists</Text>
+      <Text style={styles.sectionTitle}>Random Artists</Text>
       <View style={styles.listContainer}>
         <FlashList
-          data={favoriteArtists}
+          data={randomArtists}
           horizontal
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => {
@@ -34,7 +37,7 @@ export function FavouriteArtistsSection() {
               </View>
             );
           }}
-          keyExtractor={(item) => `fav-artist-${item.name}`}
+          keyExtractor={(item) => `rand-artist-${item.name}`}
           contentContainerStyle={styles.listContent}
         />
       </View>
@@ -53,7 +56,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   listContainer: {
-    height: 185, // Approximate height for ArtistCircle
+    height: 200, // Approximate height for ArtistCircle
   },
   listContent: {
     paddingHorizontal: Spacing.xl,

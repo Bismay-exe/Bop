@@ -12,8 +12,9 @@ import { HomeHeader } from '../../components/home/HomeHeader';
 import { HeroCard } from '../../components/home/HeroCard';
 import { QuickActions } from '../../components/home/QuickActions';
 import { RecentlyPlayedSection } from '../../components/home/RecentlyPlayedSection';
-import { FavouriteAlbumsSection } from '../../components/home/FavouriteAlbumsSection';
-import { FavouriteArtistsSection } from '../../components/home/FavouriteArtistsSection';
+import { AlbumsSection } from '../../components/home/AlbumsSection';
+import { ArtistsSection } from '../../components/home/ArtistsSection';
+import { OnRepeatSection } from '../../components/home/OnRepeatSection';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -95,8 +96,9 @@ export default function HomeScreen() {
             <HeroCard />
             <QuickActions />
             <RecentlyPlayedSection />
-            <FavouriteAlbumsSection />
-            <FavouriteArtistsSection />
+            <OnRepeatSection />
+            <AlbumsSection />
+            <ArtistsSection />
           </>
         )}
         

@@ -77,8 +77,9 @@ export function startEventSync(): () => void {
       };
       usePlayerStore.getState().setCurrentTrack(song);
       
-      // Add to recently played
+      // Add to recently played and increment play count
       useLibraryStore.getState().addRecentlyPlayed(song.id);
+      useLibraryStore.getState().incrementPlayCount(song.id);
 
       // Aggressively prefetch lyrics in the background
       prefetchLyricsForTrack(song.artist, song.title, song.id);

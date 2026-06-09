@@ -156,3 +156,15 @@ export function usePlaylists(): Playlist[] {
   // but we can sort them here if needed.
   return useLibraryStore((s) => s.playlists);
 }
+
+export function useOnRepeat(): Song[] {
+  const songs = useLibraryStore((s) => s.songs);
+  const playCounts = useLibraryStore((s) => s.playCounts);
+
+  return useMemo(() => {
+    // Only include songs that have been played at least once
+    const repeated = songs.filter(s => (playCounts[s.id] || 0) > 0);
+    // Sort by play count descending
+    return repeated.sort((a, b) => (playCounts[b.id] || 0) - (playCounts[a.id] || 0));
+  }, [songs, playCounts]);
+}

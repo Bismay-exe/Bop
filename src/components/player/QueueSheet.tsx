@@ -95,6 +95,8 @@ export default function QueueSheet() {
         keyExtractor={(item) => item.queueId}
         onScroll={handleScroll}
         scrollEventThrottle={16}
+        bounces={false}
+        overScrollMode="never"
       />
     </Animated.View>
   );

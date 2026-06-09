@@ -7,6 +7,7 @@ interface LibraryStore {
   playlists: Playlist[];
   favorites: Set<string>;
   recentlyPlayed: string[]; // Song IDs, max 50
+  playCounts: Record<string, number>; // songId -> play count
   isScanning: boolean;
   isRefreshing: boolean;
   scanProgress: number; // 0-1
@@ -26,6 +27,7 @@ interface LibraryStore {
   
   toggleFavorite: (songId: string) => void;
   addRecentlyPlayed: (songId: string) => void;
+  incrementPlayCount: (songId: string) => void;
   
   reconcileLibrary: () => void; // Removes orphaned IDs
 
@@ -38,6 +40,7 @@ export const useLibraryStore = create<LibraryStore>((set, get) => ({
   playlists: [],
   favorites: new Set(),
   recentlyPlayed: [],
+  playCounts: {},
   isScanning: false,
   isRefreshing: false,
   scanProgress: 0,
@@ -63,6 +66,13 @@ export const useLibraryStore = create<LibraryStore>((set, get) => ({
       
       const newFavorites = new Set([...state.favorites].filter(id => validSongIds.has(id)));
       const newRecentlyPlayed = state.recentlyPlayed.filter(id => validSongIds.has(id));
+      
+      const newPlayCounts: Record<string, number> = {};
+      Object.keys(state.playCounts).forEach(id => {
+        if (validSongIds.has(id)) {
+          newPlayCounts[id] = state.playCounts[id];
+        }
+      });
       const newPlaylists = state.playlists.map(p => ({
         ...p,
         songIds: p.songIds.filter(id => validSongIds.has(id))
@@ -72,6 +82,7 @@ export const useLibraryStore = create<LibraryStore>((set, get) => ({
         searchIndex,
         favorites: newFavorites,
         recentlyPlayed: newRecentlyPlayed,
+        playCounts: newPlayCounts,
         playlists: newPlaylists,
         isScanning: false,
         isRefreshing: false,
@@ -82,33 +93,65 @@ export const useLibraryStore = create<LibraryStore>((set, get) => ({
     get().persist();
   },
   
-  addPlaylist: (playlist) => set((state) => ({ playlists: [...state.playlists, playlist] })),
-  updatePlaylist: (id, updates) => set((state) => ({
-    playlists: state.playlists.map(p => p.id === id ? { ...p, ...updates, updatedAt: Date.now() } : p)
-  })),
-  deletePlaylist: (id) => set((state) => ({ playlists: state.playlists.filter(p => p.id !== id) })),
+  addPlaylist: (playlist) => {
+    set((state) => ({ playlists: [...state.playlists, playlist] }));
+    get().persist();
+  },
+  updatePlaylist: (id, updates) => {
+    set((state) => ({
+      playlists: state.playlists.map(p => p.id === id ? { ...p, ...updates, updatedAt: Date.now() } : p)
+    }));
+    get().persist();
+  },
+  deletePlaylist: (id) => {
+    set((state) => ({ playlists: state.playlists.filter(p => p.id !== id) }));
+    get().persist();
+  },
   
-  toggleFavorite: (songId) => set((state) => {
-    const newFavorites = new Set(state.favorites);
-    if (newFavorites.has(songId)) {
-      newFavorites.delete(songId);
-    } else {
-      newFavorites.add(songId);
-    }
-    return { favorites: newFavorites };
-  }),
+  toggleFavorite: (songId) => {
+    set((state) => {
+      const newFavorites = new Set(state.favorites);
+      if (newFavorites.has(songId)) {
+        newFavorites.delete(songId);
+      } else {
+        newFavorites.add(songId);
+      }
+      return { favorites: newFavorites };
+    });
+    get().persist();
+  },
   
-  addRecentlyPlayed: (songId) => set((state) => {
-    // Deduplicate and move existing item to the front, capping at 50
-    const filtered = state.recentlyPlayed.filter(id => id !== songId);
-    return { recentlyPlayed: [songId, ...filtered].slice(0, 50) };
-  }),
+  addRecentlyPlayed: (songId) => {
+    set((state) => {
+      // Deduplicate and move existing item to the front, capping at 50
+      const filtered = state.recentlyPlayed.filter(id => id !== songId);
+      return { recentlyPlayed: [songId, ...filtered].slice(0, 50) };
+    });
+    get().persist();
+  },
+
+  incrementPlayCount: (songId) => {
+    set((state) => ({
+      playCounts: {
+        ...state.playCounts,
+        [songId]: (state.playCounts[songId] || 0) + 1
+      }
+    }));
+    get().persist();
+  },
 
   reconcileLibrary: () => set((state) => {
     const validSongIds = new Set(state.songs.map(s => s.id));
     
     const newFavorites = new Set([...state.favorites].filter(id => validSongIds.has(id)));
     const newRecentlyPlayed = state.recentlyPlayed.filter(id => validSongIds.has(id));
+    
+    const newPlayCounts: Record<string, number> = {};
+    Object.keys(state.playCounts).forEach(id => {
+      if (validSongIds.has(id)) {
+        newPlayCounts[id] = state.playCounts[id];
+      }
+    });
     const newPlaylists = state.playlists.map(p => ({
       ...p,
       songIds: p.songIds.filter(id => validSongIds.has(id))
@@ -117,6 +160,7 @@ export const useLibraryStore = create<LibraryStore>((set, get) => ({
     return {
       favorites: newFavorites,
       recentlyPlayed: newRecentlyPlayed,
+      playCounts: newPlayCounts,
       playlists: newPlaylists,
     };
   }),

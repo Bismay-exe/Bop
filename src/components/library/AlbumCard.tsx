@@ -56,13 +56,13 @@ export const AlbumCard = React.memo(AlbumCardComponent, (prev, next) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: 140,
+    width: 170,
     marginRight: Spacing.md,
     marginBottom: Spacing.md,
   },
   artwork: {
-    width: 150,
-    height: 150,
+    width: 170,
+    height: 170,
     borderRadius: Radius.md,
     backgroundColor: Colors.surface,
     marginBottom: Spacing.sm,

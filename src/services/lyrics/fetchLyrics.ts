@@ -2,6 +2,12 @@ import { normalizeTitle, normalizeArtist } from './normalizeMetadata';
 import { getCachedLyrics, setCachedLyrics, LyricsPayload } from './lyricsCache';
 import { parsePlainLyrics, parseSyncedLyrics } from './lyricsParser';
 
+// NOTE: 'User-Agent' is a forbidden header per the Fetch spec and is blocked by
+// Android's OkHttp layer in release builds, causing fetch() to fail silently.
+// We use 'Lrclib-Client' instead — a non-restricted header lrclib.net accepts
+// for app identification (same purpose, no platform restrictions).
+const LRCLIB_CLIENT_HEADER = { 'Lrclib-Client': 'BopMusicApp/1.0.0 (https://github.com/bismay-exe/bop)' };
+
 const inFlightRequests = new Map<string, Promise<LyricsPayload | null>>();
 
 export async function fetchLyrics(artist: string, title: string, signal?: AbortSignal): Promise<LyricsPayload | null> {
@@ -42,7 +48,7 @@ export async function fetchLyrics(artist: string, title: string, signal?: AbortS
         let data: any = null;
         let response = await fetch(url, { 
           signal: controller.signal,
-          headers: { 'User-Agent': 'BopMusicApp/1.0.0 (https://github.com/bismay-exe/bop)' }
+          headers: LRCLIB_CLIENT_HEADER,
         });
         
         if (response.ok) {
@@ -52,7 +58,7 @@ export async function fetchLyrics(artist: string, title: string, signal?: AbortS
           const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(normArtist + ' ' + normTitle)}`;
           const searchResponse = await fetch(searchUrl, { 
             signal: controller.signal,
-            headers: { 'User-Agent': 'BopMusicApp/1.0.0 (https://github.com/bismay-exe/bop)' }
+            headers: LRCLIB_CLIENT_HEADER,
           });
           
           if (searchResponse.ok) {

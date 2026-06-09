@@ -12,6 +12,7 @@ export const STORAGE_KEYS = {
   PLAYLISTS: 'library:playlists',
   FAVORITES: 'library:favorites',
   RECENTLY_PLAYED: 'library:recently_played',
+  PLAY_COUNTS: 'library:play_counts',
   PLAYBACK_SNAPSHOT: 'player:snapshot',
 } as const;
 
@@ -58,17 +59,27 @@ useLibraryStore.setState({
     const songs = MediaCache.getAllSongs();
     const lastScanned = MediaCache.getLastSyncTimestamp();
 
-    const [playlists, favoritesArray, recentlyPlayed] = await Promise.all([
+    const [playlists, favoritesArray, recentlyPlayed, playCounts] = await Promise.all([
       getItem<any[]>(STORAGE_KEYS.PLAYLISTS),
       getItem<string[]>(STORAGE_KEYS.FAVORITES),
       getItem<string[]>(STORAGE_KEYS.RECENTLY_PLAYED),
+      getItem<Record<string, number>>(STORAGE_KEYS.PLAY_COUNTS),
     ]);
+
+    let initialPlayCounts = playCounts ?? {};
+    // One-time migration: If playCounts is empty, populate it with recently played songs so the section isn't totally blank
+    if (Object.keys(initialPlayCounts).length === 0 && recentlyPlayed && recentlyPlayed.length > 0) {
+      recentlyPlayed.forEach(id => {
+        initialPlayCounts[id] = 1;
+      });
+    }
 
     useLibraryStore.setState({
       songs: songs ?? [],
       playlists: playlists ?? [],
       favorites: new Set(favoritesArray ?? []),
       recentlyPlayed: recentlyPlayed ?? [],
+      playCounts: initialPlayCounts,
       lastScanned: lastScanned || null,
     });
   },
@@ -82,6 +93,7 @@ useLibraryStore.setState({
       setItem(STORAGE_KEYS.PLAYLISTS, state.playlists),
       setItem(STORAGE_KEYS.FAVORITES, Array.from(state.favorites)),
       setItem(STORAGE_KEYS.RECENTLY_PLAYED, state.recentlyPlayed),
+      setItem(STORAGE_KEYS.PLAY_COUNTS, state.playCounts),
     ]);
   }
 });

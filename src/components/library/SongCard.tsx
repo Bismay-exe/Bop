@@ -113,8 +113,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
   },
   artwork: {
-    width: 48,
-    height: 48,
+    width: 64,
+    height: 64,
     borderRadius: Radius.sm,
     backgroundColor: Colors.surface,
   },

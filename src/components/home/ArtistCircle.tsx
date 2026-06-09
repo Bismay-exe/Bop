@@ -25,12 +25,12 @@ export function ArtistCircle({ name, artworkUri, onPress }: Props) {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    width: 150,
+    width: 170,
   },
   artwork: {
-    width: 150,
-    height: 150,
-    borderRadius: 75, // Circle
+    width: 170,
+    height: 170,
+    borderRadius: 90, // Circle
     backgroundColor: Colors.surface,
     marginBottom: Spacing.xs,
   },

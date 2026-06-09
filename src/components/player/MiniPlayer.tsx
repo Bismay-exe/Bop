@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingLeft: Spacing.xl,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.xl,
   },
   artwork: {
     borderRadius: Radius.md,

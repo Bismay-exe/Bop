@@ -211,11 +211,11 @@ const styles = StyleSheet.create({
     zIndex: 15,
   },
   rowContainer: {
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.sm * 1.5,
   },
   lineText: {
     fontFamily: "Medium",
-    fontSize: 32, // Override for larger lyrics
+    fontSize: 28, // Override for larger lyrics
     textAlign: 'left',
   },
   activeLine: {
