@@ -15,6 +15,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
+        working-directory: ./app
         run: npm ci
 
       - name: Setup Java
@@ -24,14 +25,17 @@ jobs:
           java-version: 17
 
       - name: Decode Keystore
+        working-directory: ./app
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/@bismay.exe__bop.jks
 
       - name: Set keystore file path
+        working-directory: ./app
         run: |
           echo "MYAPP_UPLOAD_STORE_FILE=@bismay.exe__bop.jks" >> android/gradle.properties
 
       - name: Build APK
+        working-directory: ./app
         env:
           NODE_ENV: production
           ANDROID_KEYSTORE_FILE: "@bismay.exe__bop.jks"
@@ -47,4 +51,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: android/app/build/outputs/apk/release/*.apk
+          path: app/android/app/build/outputs/apk/release/*.apk

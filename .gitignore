@@ -59,3 +59,6 @@ android/keystore.properties
 
 .idea/
 *.iml
+
+.mcp.json
+.mcp*
