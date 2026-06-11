@@ -62,3 +62,4 @@ android/keystore.properties
 
 .mcp.json
 .mcp*
+*.mcp.json
