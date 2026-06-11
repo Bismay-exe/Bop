@@ -10,7 +10,7 @@ const GRID_ITEM_WIDTH = (SCREEN_WIDTH - Spacing.xl * 2 - Spacing.md) / 2;
 
 // How much of the CD peeks out from behind the artwork (in px)
 const CD_SIZE = 88;        // diameter of the CD disc
-const CD_PEEK = 18;        // how many px of the CD are visible past the right edge of artwork
+const CD_PEEK = 16;        // how many px of the CD are visible past the right edge of artwork
 
 interface AlbumCardProps {
   album: AlbumGroup;
@@ -52,7 +52,7 @@ function CdDisc({ size }: { size: number }) {
 
 function AlbumCardComponent({ album, onPress, viewMode = 'grid' }: AlbumCardProps) {
   if (viewMode === 'list') {
-    const artworkSize = 92;
+    const artworkSize = 88;
 
     return (
       <TouchableOpacity style={styles.listContainer} onPress={() => onPress(album)} activeOpacity={0.7}>
@@ -113,7 +113,7 @@ function AlbumCardComponent({ album, onPress, viewMode = 'grid' }: AlbumCardProp
         <FallbackArtwork size={GRID_ITEM_WIDTH} radius={Radius.md} />
       )}
       <View style={styles.gridDetails}>
-        <Text style={styles.gridTitle} numberOfLines={1}>
+        <Text style={styles.gridTitle} numberOfLines={2} textBreakStrategy="highQuality">
           {album.name}
         </Text>
         <Text style={styles.gridArtist} numberOfLines={1}>
