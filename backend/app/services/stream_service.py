@@ -15,6 +15,8 @@ Stream URLs are NEVER cached (PRD §9/§19) — they expire ~6h and must be fres
 """
 from __future__ import annotations
 
+import os
+import tempfile
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -34,8 +36,30 @@ _FORMAT_SELECTOR = "bestaudio[ext=m4a]/bestaudio[acodec^=mp4a]/bestaudio/best"
 _URL_TTL_HOURS = 6
 
 
+def _cookie_file() -> str | None:
+    """Write YTDLP_COOKIES (if set) to a stable temp file once, return its path.
+
+    YouTube's anti-bot challenge on datacenter IPs is reliably bypassed by
+    authenticated cookies. This is the escape hatch when client-rotation alone
+    isn't enough on a given host IP.
+    """
+    raw = settings.YTDLP_COOKIES.strip()
+    if not raw:
+        return None
+    path = os.path.join(tempfile.gettempdir(), "bop_yt_cookies.txt")
+    # Rewrite only if missing/changed to avoid disk churn per request.
+    try:
+        if not os.path.exists(path) or os.path.getsize(path) != len(raw):
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(raw)
+    except OSError as exc:  # noqa: BLE001
+        log.warning("cookie_write_failed", error=str(exc))
+        return None
+    return path
+
+
 def _build_opts() -> dict[str, Any]:
-    return {
+    opts: dict[str, Any] = {
         "format": _FORMAT_SELECTOR,
         "quiet": True,
         "no_warnings": True,
@@ -43,19 +67,23 @@ def _build_opts() -> dict[str, Any]:
         "skip_download": True,
         # P4: tolerate slow/cold YouTube. socket_timeout guards each network op.
         "socket_timeout": settings.YTDLP_TIMEOUT_SECONDS,
-        "extractor_retries": 2,
+        "extractor_retries": 3,
         "cachedir": False,
-        # YouTube increasingly serves a "confirm you're not a bot" challenge to
-        # the default web client. The android/ios/tv clients use the InnerTube
-        # API and bypass that challenge WITHOUT cookies — the standard yt-dlp
-        # workaround. We list several so yt-dlp falls through on failure.
+        # YouTube serves a "confirm you're not a bot" challenge to datacenter
+        # IPs. The InnerTube tv/ios/web_safari clients bypass it best WITHOUT a
+        # PO token; we list several so yt-dlp falls through on failure. Order is
+        # configurable via YTDLP_PLAYER_CLIENTS.
         "extractor_args": {
             "youtube": {
-                "player_client": ["android", "ios", "tv", "web"],
+                "player_client": settings.ytdlp_player_clients,
             }
         },
         # No postprocessors → no ffmpeg transcode on the hot path.
     }
+    cookies = _cookie_file()
+    if cookies:
+        opts["cookiefile"] = cookies
+    return opts
 
 
 def _pick_format(info: dict[str, Any]) -> dict[str, Any] | None:

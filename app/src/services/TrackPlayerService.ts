@@ -83,8 +83,15 @@ export function startEventSync(): () => void {
     else if (event.state === 'paused') state = 'paused';
     else if (event.state === 'loading' || event.state === 'buffering') state = 'loading';
     else if (event.state === 'error') state = 'error';
-    
+
     usePlayerStore.getState().setPlaybackState(state);
+  });
+
+  // Surface native playback failures — without this, a stream URL that fails to
+  // load (codec, network, expired URL, redirect) fails SILENTLY.
+  const subErr = TrackPlayer.addEventListener(Event.PlaybackError, (event) => {
+    console.error('[TrackPlayer] PlaybackError', JSON.stringify(event));
+    usePlayerStore.getState().setPlaybackState('error');
   });
 
   const sub2 = TrackPlayer.addEventListener(Event.PlaybackActiveTrackChanged, async (event) => {
@@ -144,6 +151,7 @@ export function startEventSync(): () => void {
 
   return () => {
     sub1.remove();
+    subErr.remove();
     sub2.remove();
   };
 }

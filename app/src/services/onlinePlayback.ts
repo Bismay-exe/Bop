@@ -21,6 +21,28 @@ import { usePlayerStore } from '../store/playerStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { setupTrackPlayer } from './TrackPlayerService';
 import { getStreamInfo, getRadio } from './api/endpoints';
+import { StreamInfo } from './api/types';
+
+/**
+ * Resolve a stream URL with ONE retry — YouTube's anti-bot challenge on cloud
+ * IPs is often transient, so a single retry frequently succeeds. Returns null
+ * (instead of throwing) so callers never produce an uncaught rejection.
+ */
+async function resolveStream(videoId: string): Promise<StreamInfo | null> {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      return await getStreamInfo(videoId);
+    } catch (e) {
+      if (attempt === 0) {
+        await new Promise((r) => setTimeout(r, 800));
+        continue;
+      }
+      console.warn('[onlinePlayback] stream resolve failed', videoId, e);
+      return null;
+    }
+  }
+  return null;
+}
 
 // How many tracks ahead of the active one we keep resolved + added to RNTP.
 // Correction P3: small window, never the whole queue.
@@ -66,15 +88,12 @@ async function ensureWindowResolved(activeIndex: number): Promise<void> {
         session.resolvedCount += 1;
         continue;
       }
-      try {
-        const info = await getStreamInfo(next.videoId); // ONE at a time (P3)
+      const info = await resolveStream(next.videoId); // ONE at a time (P3)
+      if (info) {
         await TrackPlayer.add(mapOnlineSongToTrack(next, info.streamUrl));
-        session.resolvedCount += 1;
-      } catch (e) {
-        // Skip tracks that fail extraction; don't stall the queue (P4 reality).
-        console.warn('[onlinePlayback] prefetch failed, skipping', next.videoId, e);
-        session.resolvedCount += 1;
       }
+      // Advance regardless so a single bad track never stalls the queue (P4).
+      session.resolvedCount += 1;
     }
   } finally {
     resolving = false;
@@ -105,7 +124,11 @@ export async function playOnlineWithRadio(song: Song): Promise<void> {
   attachPrefetchListener();
 
   // 1. Resolve ONLY the current track and start playback ASAP.
-  const info = await getStreamInfo(song.videoId);
+  const info = await resolveStream(song.videoId);
+  if (!info) {
+    usePlayerStore.getState().setPlaybackState('error');
+    return;
+  }
   await TrackPlayer.reset();
   session = { queue: [song], resolvedCount: 0 };
   await TrackPlayer.add(mapOnlineSongToTrack(song, info.streamUrl));
@@ -150,7 +173,11 @@ export async function playOnlineQueue(songs: Song[], startIndex = 0): Promise<vo
   await setupTrackPlayer();
   attachPrefetchListener();
 
-  const info = await getStreamInfo(seed.videoId!);
+  const info = await resolveStream(seed.videoId!);
+  if (!info) {
+    usePlayerStore.getState().setPlaybackState('error');
+    return;
+  }
   await TrackPlayer.reset();
   // Order the queue so the chosen track is first; the rest follow in order.
   const ordered = [seed, ...playable.slice(start + 1), ...playable.slice(0, start)];

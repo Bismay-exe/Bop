@@ -7,8 +7,10 @@ import { EmptyState } from '../../../components/shared/EmptyState';
 import { Colors, Radius, Spacing, Typography } from '../../../constants';
 import { scanLocalMusic } from '../../../services/MediaScannerService';
 import { useLibraryStore } from '../../../store/libraryStore';
+import { useAuthStore } from '../../../store/authStore';
 
 const CATEGORIES = [
+  { id: 'cloud', title: 'Cloud Library', icon: 'cloud' },
   { id: 'playlists', title: 'Playlists', icon: 'musical-notes' },
   { id: 'artists', title: 'Artists', icon: 'person' },
   { id: 'albums', title: 'Albums', icon: 'albums' },
@@ -31,6 +33,7 @@ export default function LibraryIndexScreen() {
   const isScanning = useLibraryStore((s) => s.isScanning);
   const isRefreshing = useLibraryStore((s) => s.isRefreshing);
   const { setSongs, setRefreshing, finalizeScan } = useLibraryStore();
+  const signedIn = useAuthStore((s) => Boolean(s.session));
 
   const handleRefresh = useCallback(async () => {
     try {
@@ -48,7 +51,9 @@ export default function LibraryIndexScreen() {
     return <EmptyState permissionStatus="granted" />;
   }
 
-  if (songs.length === 0 && !isRefreshing) {
+  // Online-primary users may have no local files — keep the grid reachable
+  // (the Cloud Library card lives here) when signed in.
+  if (songs.length === 0 && !isRefreshing && !signedIn) {
     return <EmptyState permissionStatus="granted" />;
   }
 

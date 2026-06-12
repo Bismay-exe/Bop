@@ -31,6 +31,14 @@ class Settings(BaseSettings):
     YTDLP_AUDIO_FORMAT: str = "m4a"
     YTDLP_AUDIO_QUALITY: int = 0
     YTDLP_TIMEOUT_SECONDS: int = 15
+    # InnerTube player clients, in fallback order. tv/ios/web_safari bypass the
+    # "confirm you're not a bot" challenge on datacenter IPs best WITHOUT a PO
+    # token (android/web are challenged most). Tune on Railway via env.
+    YTDLP_PLAYER_CLIENTS: str = "tv,ios,web_safari,mweb"
+    # Escape hatch when YouTube keeps blocking the host IP: paste the contents of
+    # a Netscape cookies.txt (from a logged-in YouTube session) into this env var.
+    # When set, it's written to a temp file and passed to yt-dlp as cookiefile.
+    YTDLP_COOKIES: str = ""
 
     # ─── Region ─────────────────────────────────────────────────────────────
     DEFAULT_COUNTRY: str = "IN"
@@ -56,6 +64,10 @@ class Settings(BaseSettings):
     @property
     def supabase_configured(self) -> bool:
         return bool(self.SUPABASE_URL and self.SUPABASE_SERVICE_ROLE_KEY)
+
+    @property
+    def ytdlp_player_clients(self) -> list[str]:
+        return [c.strip() for c in self.YTDLP_PLAYER_CLIENTS.split(",") if c.strip()]
 
     @property
     def jwks_url(self) -> str:
