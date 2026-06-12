@@ -50,6 +50,15 @@ export interface CachedSong {
   mood?: string;
   folder?: string;
   dateAdded: number;
+
+  // ─── Online streaming (Phase 1) ──────────────────────────────────────────
+  // 'local' = scanned device file (default for all existing data).
+  // 'online' = YouTube Music track fetched from the backend.
+  source?: 'local' | 'online';
+  videoId?: string;          // YouTube videoId (online only; equals `id`)
+  thumbnailUrl?: string;     // remote artwork URL (online only)
+  streamUrl?: string;        // resolved stream URL (online; filled lazily, never persisted)
+  streamExpiresAt?: number;  // epoch ms when streamUrl expires (online)
 }
 
 export type QueueTaskType = 'METADATA' | 'ARTWORK';

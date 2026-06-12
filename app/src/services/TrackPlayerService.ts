@@ -89,13 +89,14 @@ export function startEventSync(): () => void {
 
   const sub2 = TrackPlayer.addEventListener(Event.PlaybackActiveTrackChanged, async (event) => {
     if (event.track) {
-      // It's a minimal Track object; we can cast or fetch details.
-      // We stored the full `Song` attributes when we added it via mapSongToTrack,
-      // but to be safe we can extract what RNTP gives us.
       const track = event.track;
+
+      // Prefer the rich Song we already have in the queue (covers online tracks,
+      // which carry source/videoId/thumbnail and are NOT in the local library).
+      const queueSong = usePlayerStore.getState().queue.find(s => (s.videoId ?? s.id) === track.id);
       const librarySong = useLibraryStore.getState().songs.find(s => s.id === track.id);
-      
-      const song: Song = librarySong ? librarySong : {
+
+      const song: Song = queueSong ? queueSong : librarySong ? librarySong : {
         id: track.id,
         uri: track.url || '',
         filename: 'unknown',
@@ -108,10 +109,27 @@ export function startEventSync(): () => void {
         dateAdded: Date.now(),
       };
       usePlayerStore.getState().setCurrentTrack(song);
-      
-      // Add to recently played and increment play count
-      useLibraryStore.getState().addRecentlyPlayed(song.id);
-      useLibraryStore.getState().incrementPlayCount(song.id);
+
+      // Local library stats only apply to local songs (online videoIds are not
+      // local Song.ids and would just pollute recently-played/play-counts).
+      if (song.source !== 'online') {
+        useLibraryStore.getState().addRecentlyPlayed(song.id);
+        useLibraryStore.getState().incrementPlayCount(song.id);
+      } else if (song.videoId) {
+        // Online: record listening history to the backend (fire-and-forget;
+        // no-op/401 when signed out — handled inside recordHistory's caller).
+        import('./api/endpoints')
+          .then(({ recordHistory }) =>
+            recordHistory({
+              video_id: song.videoId!,
+              title: song.title ?? 'Unknown',
+              artist: song.artist ?? 'Unknown',
+              thumbnail_url: song.thumbnailUrl ?? song.artwork ?? null,
+              play_duration_seconds: Math.round(song.duration || 0),
+            }),
+          )
+          .catch(() => {});
+      }
 
       // Aggressively prefetch lyrics in the background
       prefetchLyricsForTrack(song.artist, song.title, song.id);

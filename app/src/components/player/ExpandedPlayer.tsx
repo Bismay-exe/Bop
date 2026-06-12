@@ -10,6 +10,7 @@ import ArtworkView from './ArtworkView';
 import ProgressBar from './ProgressBar';
 import PlaybackControls from './PlaybackControls';
 import PlayerPillsBar from './PlayerPillsBar';
+import LikeButton from './LikeButton';
 
 // Custom SVGs
 import DownIcon from '../../assets/icons/down.svg';
@@ -127,8 +128,9 @@ export default function ExpandedPlayer({ onCollapse }: Props) {
               </Text>
             </View>
           </View>
-          {/* Heart button is now a ghost element in PersistentPlayer */}
-          <View style={styles.heartPlaceholder} />
+          {/* Heart: functional for online tracks (cloud library); local-file
+              favoriting still handled by the ghost heart in PersistentPlayer. */}
+          <LikeButton />
         </View>
         {/* Controls that reveal after expansion */}
         <Animated.View style={[styles.controlsContainer, controlsStyle]}>

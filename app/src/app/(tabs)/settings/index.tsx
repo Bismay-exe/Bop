@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AccountSection from '../../../components/settings/AccountSection';
 import SettingRow from '../../../components/settings/SettingRow';
 import SettingSection from '../../../components/settings/SettingSection';
 import { Colors, Spacing, Typography } from '../../../constants';
@@ -16,6 +17,8 @@ export default function SettingsIndexScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <AccountSection />
+
         <SettingSection title="General">
           <SettingRow
             icon="color-palette-outline"

@@ -1,25 +1,28 @@
 import { FlashList } from '@shopify/flash-list';
 import { useCallback, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { SongCard } from '../../components/library/SongCard';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { SearchBar } from '../../components/shared/SearchBar';
 import { Colors, Spacing, Typography } from '../../constants';
-import { useSearch } from '../../hooks/useSearch';
-import { replaceQueueAndPlay } from '../../services/TrackPlayerService';
-import { useLibraryStore } from '../../store/libraryStore';
+import { useOnlineSearch } from '../../hooks/useOnlineSearch';
+import { playOnlineQueue } from '../../services/onlinePlayback';
 import { Song } from '../../types';
 
 export default function SearchScreen() {
   const [query, setQuery] = useState('');
-  const searchResults = useSearch(query);
-  const isScanning = useLibraryStore((s) => s.isScanning);
+  const { results, loading, error } = useOnlineSearch(query);
 
-  const handlePlaySong = useCallback(async (song: Song) => {
-    // For search, queue context is just the search results
-    const index = searchResults.findIndex((s) => s.id === song.id);
-    await replaceQueueAndPlay(searchResults, index !== -1 ? index : 0);
-  }, [searchResults]);
+  const handlePlaySong = useCallback(
+    async (song: Song) => {
+      const index = results.findIndex((s) => s.id === song.id);
+      // Lazy queue: resolves the tapped track now, prefetches next 1–2 only.
+      await playOnlineQueue(results, index !== -1 ? index : 0);
+    },
+    [results],
+  );
+
+  const trimmed = query.trim();
 
   return (
     <View style={styles.container}>
@@ -34,16 +37,25 @@ export default function SearchScreen() {
       </View>
 
       <View style={styles.contentContainer}>
-        {isScanning ? (
-          <EmptyState permissionStatus="granted" />
-        ) : query.trim().length < 2 ? (
+        {trimmed.length < 2 ? (
           <EmptyState
             permissionStatus="granted"
             iconOverride="search-outline"
             titleOverride="Find Your Music"
-            subtitleOverride="Search for songs, artists, or albums in your library."
+            subtitleOverride="Search millions of songs from YouTube Music."
           />
-        ) : searchResults.length === 0 ? (
+        ) : loading ? (
+          <View style={styles.centered}>
+            <ActivityIndicator color={Colors.primary} />
+          </View>
+        ) : error ? (
+          <EmptyState
+            permissionStatus="granted"
+            iconOverride="cloud-offline-outline"
+            titleOverride="Search Failed"
+            subtitleOverride={error}
+          />
+        ) : results.length === 0 ? (
           <EmptyState
             permissionStatus="granted"
             iconOverride="sad-outline"
@@ -52,12 +64,13 @@ export default function SearchScreen() {
           />
         ) : (
           <FlashList
-            data={searchResults}
+            data={results}
             renderItem={({ item }) => (
               <SongCard song={item} onPress={handlePlaySong} />
             )}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContent}
+            keyboardShouldPersistTaps="handled"
           />
         )}
       </View>
@@ -83,8 +96,12 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
   },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   listContent: {
     paddingBottom: Spacing.xxl,
   },
 });
-
