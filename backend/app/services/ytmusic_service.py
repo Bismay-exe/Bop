@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import structlog
 from fastapi.concurrency import run_in_threadpool
 from ytmusicapi import YTMusic
 
@@ -20,6 +21,8 @@ from app.utils.helpers import (
     first_artist_name,
     join_artist_names,
 )
+
+log = structlog.get_logger()
 
 # Single shared client. ytmusicapi is thread-safe for read calls.
 _yt: YTMusic | None = None
@@ -95,33 +98,50 @@ _FILTER_MAP = {
 async def search(query: str, search_type: str = "top", limit: int = 20) -> dict[str, Any]:
     client = get_client()
 
+    def _safe(filter_name: str, limit_n: int) -> list:
+        """One category search, isolated. ytmusicapi can raise KeyError
+        ('musicSelfRenderer', etc.) parsing an unexpected result type for a given
+        query — that must not take down the whole search. Returns [] on failure."""
+        try:
+            return client.search(query, filter=filter_name, limit=limit_n)
+        except Exception as exc:  # noqa: BLE001
+            log.warning("search_category_failed", filter=filter_name, error=str(exc))
+            return []
+
+    def _safe_map(items: list, fn) -> list:
+        out = []
+        for it in items:
+            try:
+                out.append(fn(it))
+            except Exception:  # noqa: BLE001
+                continue
+        return out
+
     def _run() -> dict[str, Any]:
         if search_type == "top":
-            # Lightweight: fetch a small slice of each main category.
-            songs = client.search(query, filter="songs", limit=5)
-            artists = client.search(query, filter="artists", limit=5)
-            albums = client.search(query, filter="albums", limit=5)
+            # Lightweight: fetch a small slice of each main category, each
+            # isolated so a parser failure in one still returns the others.
             return {
                 "query": query,
                 "type": "top",
-                "songs": [_norm_song(s) for s in songs],
-                "artists": [_norm_artist_ref(a) for a in artists],
-                "albums": [_norm_album_ref(a) for a in albums],
+                "songs": _safe_map(_safe("songs", 5), _norm_song),
+                "artists": _safe_map(_safe("artists", 5), _norm_artist_ref),
+                "albums": _safe_map(_safe("albums", 5), _norm_album_ref),
             }
 
         yt_filter = _FILTER_MAP.get(search_type)
         if yt_filter is None:
             raise APIError("SEARCH_FAILED", f"Unknown search type '{search_type}'", 400)
 
-        raw = client.search(query, filter=yt_filter, limit=limit)
+        raw = _safe(yt_filter, limit)
         if search_type == "songs" or search_type == "videos":
-            results = [_norm_song(r) for r in raw]
+            results = _safe_map(raw, _norm_song)
         elif search_type == "artists":
-            results = [_norm_artist_ref(r) for r in raw]
+            results = _safe_map(raw, _norm_artist_ref)
         elif search_type == "albums":
-            results = [_norm_album_ref(r) for r in raw]
+            results = _safe_map(raw, _norm_album_ref)
         else:  # playlists
-            results = [_norm_playlist_ref(r) for r in raw]
+            results = _safe_map(raw, _norm_playlist_ref)
         return {"query": query, "type": search_type, "results": results}
 
     try:
