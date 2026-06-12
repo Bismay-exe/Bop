@@ -36,6 +36,49 @@ def _hit(key: str, limit: int) -> bool:
     return True
 
 
+# ─── Daily stream quota (PRD §20 — QUOTA_EXCEEDED) ──────────────────────────
+# key -> (day_epoch, count)
+_daily: dict[str, tuple[int, int]] = {}
+
+
+def enforce_stream_quota(user_id: str | None, ip: str) -> None:
+    """Per-user (or per-IP if anon) daily cap on stream extractions."""
+    limit = settings.STREAM_DAILY_QUOTA
+    if limit <= 0:
+        return
+    key = f"quota:{user_id or ip}"
+    day = int(time.time() // 86400)
+    cur_day, count = _daily.get(key, (day, 0))
+    if cur_day != day:
+        _daily[key] = (day, 1)
+        return
+    if count >= limit:
+        raise APIError("QUOTA_EXCEEDED", "Daily stream quota reached", 429)
+    _daily[key] = (day, count + 1)
+
+
+# ─── Generic per-IP route limiting (PRD §20) ────────────────────────────────
+# Path-prefix -> requests/min per IP. Stream handled separately (tiered).
+_PREFIX_LIMITS: list[tuple[str, int]] = [
+    ("/api/v1/search", settings.SEARCH_RATE_LIMIT_PER_MINUTE),
+    ("/api/v1/explore", 60),
+    ("/api/v1/recommendations", 60),
+    ("/api/v1/auth/sync", 5),
+    ("/api/v1/library", 120),
+    ("/api/v1/playlist", 60),
+]
+
+
+def enforce_path_limit(request: Request) -> None:
+    path = request.url.path
+    for prefix, limit in _PREFIX_LIMITS:
+        if path.startswith(prefix):
+            ip = request.client.host if request.client else "unknown"
+            if not _hit(f"path:{prefix}:{ip}", limit):
+                raise APIError("RATE_LIMITED", "Too many requests, slow down", 429)
+            return
+
+
 def enforce_stream_limit(request: Request, user_id: str | None) -> None:
     """Tiered limit for /stream (PRD §9/§20):
       • authenticated → STREAM_RATE_LIMIT_PER_MINUTE per user (default 30)

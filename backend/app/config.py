@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     STREAM_RATE_LIMIT_PER_MINUTE: int = 30
     STREAM_RATE_LIMIT_IP_PER_MINUTE: int = 60
     SEARCH_RATE_LIMIT_PER_MINUTE: int = 60
+    STREAM_DAILY_QUOTA: int = 1000  # per-user/day; 0 disables
 
     # ─── Observability ──────────────────────────────────────────────────────
     LOG_LEVEL: str = "INFO"

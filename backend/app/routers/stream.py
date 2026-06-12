@@ -13,7 +13,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query, Request
 
 from app.dependencies import get_optional_user
-from app.middleware.rate_limit import enforce_stream_limit
+from app.middleware.rate_limit import enforce_stream_limit, enforce_stream_quota
 from app.services import stream_service
 from app.utils.errors import success
 
@@ -31,6 +31,7 @@ async def get_stream(
     user_id = user["id"] if user else None
     request.state.auth_user_id = user_id
     enforce_stream_limit(request, user_id)
+    enforce_stream_quota(user_id, request.client.host if request.client else "unknown")
 
     data = await stream_service.extract_stream(video_id)
     return success(data)

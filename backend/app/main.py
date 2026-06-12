@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.middleware.logging import LoggingMiddleware, configure_logging
+from app.middleware.rate_limit import enforce_path_limit
 from app.routers import (
     album,
     artist,
@@ -33,6 +34,16 @@ from app.utils.errors import (
     success,
     unhandled_error_response,
 )
+
+
+async def _rate_limit_mw(request: Request, call_next):
+    """Per-IP route limiting (PRD §20). Stream uses its own tiered limit + quota."""
+    try:
+        enforce_path_limit(request)
+    except APIError as exc:
+        log.warning("error", error_code=exc.code, message=exc.message, path=request.url.path)
+        return api_error_response(request, exc)
+    return await call_next(request)
 
 configure_logging()
 log = structlog.get_logger()
@@ -56,7 +67,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="BOP Music Backend", version=VERSION, lifespan=lifespan)
 
-# ─── Middleware (order: CORS outermost, then logging) ───────────────────────
+# ─── Middleware (added last = runs first; so order below is inner→outer) ─────
+app.middleware("http")(_rate_limit_mw)
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(
     CORSMiddleware,
